@@ -1,0 +1,39 @@
+{
+  "name": "@blindfold/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP server for Blindfold Auth: lets an agent or IDE create projects, issue keys, configure roles/policies, and generate integration snippets.",
+  "main": "dist/src/index.js",
+  "bin": {
+    "blindfold-mcp": "dist/bin/blindfold-mcp.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./doctor": {
+      "types": "./dist/src/doctor.d.ts",
+      "default": "./dist/src/doctor.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "dependencies": {
+    "@blindfold/auth": "0.1.0",
+    "@blindfold/client": "0.1.0",
+    "@blindfold/control": "0.1.0"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@modelcontextprotocol/sdk": {
+      "optional": true
+    }
+  },
+  "types": "dist/src/index.d.ts"
+}

@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a bug in Blindfold Auth
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please include enough detail for us to reproduce the issue.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Short description of the problem
+    validations:
+      required: true
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Deployment lane
+      options:
+        - Local workspace example
+        - Embedded Node + Postgres
+        - Docker Compose
+        - Lambda + DynamoDB reference
+        - Other / custom
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: Affected package or example
+      placeholder: '@blindfold/auth, @blindfold/auth-cli, examples/postgres-workspace'
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: Tell us what you ran and what happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, OS, browser if relevant, and any config details that matter

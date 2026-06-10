@@ -1,0 +1,27 @@
+{
+  "name": "@blindfold/example-demo-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Acme Support Console — a full-stack demo proving Blindfold Auth end-to-end: login, RBAC, ABAC field masking, and dynamic step-up MFA.",
+  "main": "dist/src/server.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "prestart": "npm run build",
+    "start": "node dist/src/server.js",
+    "pretest": "npm run build",
+    "test": "node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "@blindfold/auth": "0.1.0",
+    "@blindfold/client": "0.1.0",
+    "@blindfold/risk": "0.1.0"
+  },
+  "types": "dist/src/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./dist/src/server.js"
+    }
+  }
+}

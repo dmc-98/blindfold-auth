@@ -1,0 +1,45 @@
+{
+  "name": "blindfold-auth-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "test": "npm run build:ts && npm run test:unit",
+    "typecheck": "npm run build:ts",
+    "build:packages": "tsc -p ./packages/auth && tsc -p ./packages/auth-client && tsc -p ./packages/auth-testing && tsc -p ./packages/auth-storage-sqlite && tsc -p ./packages/auth-storage-mongo && tsc -p ./packages/auth-storage-postgres && tsc -p ./packages/auth-control && tsc -p ./packages/auth-risk && tsc -p ./packages/auth-studio && tsc -p ./packages/auth-adapter-serverless && tsc -p ./packages/auth-sso && tsc -p ./packages/auth-mobile && tsc -p ./packages/auth-scim && tsc -p ./packages/auth-mcp && tsc -p ./packages/auth-playground && tsc -p ./packages/auth-cli",
+    "build:examples": "tsc -p ./examples/demo-app && tsc -p ./examples/lambda-dynamodb && tsc -p ./examples/local-workspace && tsc -p ./examples/postgres-workspace",
+    "build:tools": "tsc -p ./tsconfig.tools.json",
+    "build:ts": "npm run build:packages && npm run build:examples && npm run build:tools",
+    "test:unit": "node --test packages/*/dist/test/*.test.js",
+    "test:e2e": "npm run build:packages && npm run build:tools && node --test dist-tools/e2e/*.e2e.test.js",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "perf:bench": "node ./dist-tools/benchmarks/auth.perf.js",
+    "playwright:install": "npx playwright install chromium",
+    "studio:example": "node packages/auth-cli/dist/bin/blindfold-auth.js studio --config ./examples/local-workspace/dist/blindfold.config.js --port 4110",
+    "bootstrap:example": "node packages/auth-cli/dist/bin/blindfold-auth.js bootstrap --config ./examples/local-workspace/dist/blindfold.config.js --workspace-name \"Blindfold Demo Workspace\"",
+    "seed:example": "node packages/auth-cli/dist/bin/blindfold-auth.js seed-demo --config ./examples/local-workspace/dist/blindfold.config.js",
+    "seed:launch-demo": "node packages/auth-cli/dist/bin/blindfold-auth.js seed-launch-demo --config ./examples/local-workspace/dist/blindfold.config.js",
+    "launch:assets": "node ./dist-tools/scripts/generate-launch-assets.js",
+    "build:landing": "npm run build:tools && node ./dist-tools/scripts/build-landing.js",
+    "demo:build": "tsc -p ./examples/demo-app",
+    "demo:start": "npm run demo:build && node ./examples/demo-app/dist/src/server.js",
+    "demo:test": "npm run demo:build && node --test ./examples/demo-app/dist/test/*.test.js",
+    "postgres:up": "docker compose -f ./examples/postgres-workspace/docker-compose.yml up -d postgres",
+    "postgres:down": "docker compose -f ./examples/postgres-workspace/docker-compose.yml down",
+    "migrate:postgres-example": "node packages/auth-cli/dist/bin/blindfold-auth.js migrate --config ./examples/postgres-workspace/dist/blindfold.config.js",
+    "bootstrap:postgres-example": "node packages/auth-cli/dist/bin/blindfold-auth.js bootstrap --config ./examples/postgres-workspace/dist/blindfold.config.js --workspace-name \"Blindfold Postgres Workspace\"",
+    "studio:postgres-example": "node packages/auth-cli/dist/bin/blindfold-auth.js studio --config ./examples/postgres-workspace/dist/blindfold.config.js --port 4110",
+    "smoke:postgres-example": "node ./examples/postgres-workspace/dist/smoke.js",
+    "smoke:lambda-example": "node ./examples/lambda-dynamodb/dist/invoke.js"
+  },
+  "devDependencies": {
+    "gifenc": "^1.0.3",
+    "playwright": "^1.53.0",
+    "pngjs": "^7.0.0",
+    "typescript": "^5.9.3"
+  }
+}

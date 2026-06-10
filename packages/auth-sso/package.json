@@ -1,0 +1,22 @@
+{
+  "name": "@blindfold/sso",
+  "version": "1.0.0-rc.1",
+  "type": "module",
+  "description": "Versioned public SSO contract for Blindfold Auth (OIDC + SAML). Wraps the engine federation surface with a stable v1 API, typed in TypeScript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "pretest": "npm run build",
+    "test": "node --test dist/test/*.test.js"
+  },
+  "peerDependencies": {
+    "@blindfold/auth": "0.1.0"
+  }
+}

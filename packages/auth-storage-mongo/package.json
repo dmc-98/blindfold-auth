@@ -1,0 +1,32 @@
+{
+  "name": "@blindfold/auth-storage-mongo",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MongoDB (NoSQL) storage adapter for Blindfold Auth. Maps each auth table to a collection of documents.",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./memory": {
+      "types": "./dist/src/in-memory-db.d.ts",
+      "default": "./dist/src/in-memory-db.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "peerDependencies": {
+    "@blindfold/auth": "0.1.0",
+    "mongodb": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "mongodb": {
+      "optional": true
+    }
+  },
+  "types": "dist/src/index.d.ts"
+}

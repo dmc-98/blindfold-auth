@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist-tools",
+    "types": ["node"],
+    "lib": ["ES2022", "DOM"],
+    "allowJs": false,
+    "noEmit": false
+  },
+  "include": ["scripts/**/*.ts", "e2e/**/*.ts", "benchmarks/**/*.ts"]
+}

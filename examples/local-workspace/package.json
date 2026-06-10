@@ -1,0 +1,12 @@
+{
+  "name": "@blindfold/example-local-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@blindfold/auth": "0.1.0"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  }
+}
