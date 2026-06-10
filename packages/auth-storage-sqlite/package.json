@@ -1,0 +1,25 @@
+{
+  "name": "@blindfold/auth-storage-sqlite",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SQLite storage adapter for Blindfold Auth using Node's built-in node:sqlite. Great for local development, tests, and edge/single-node deployments.",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "peerDependencies": {
+    "@blindfold/auth": "0.1.0"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "types": "dist/src/index.d.ts"
+}

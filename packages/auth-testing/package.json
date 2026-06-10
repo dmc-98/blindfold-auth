@@ -1,0 +1,27 @@
+{
+  "name": "@blindfold/testing",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Test helpers for Blindfold Auth: zero-dependency in-memory test mode, seed factories, session minting, and RBAC/ABAC assertions.",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./conformance": {
+      "types": "./dist/src/storage-conformance.d.ts",
+      "default": "./dist/src/storage-conformance.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "dependencies": {
+    "@blindfold/auth": "0.1.0",
+    "@blindfold/client": "0.1.0"
+  },
+  "types": "dist/src/index.d.ts"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@blindfold/control",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Multi-project control plane for Blindfold Auth: a registry of projects and hashed API keys so many products share one auth control plane safely.",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "types": "dist/src/index.d.ts"
+}

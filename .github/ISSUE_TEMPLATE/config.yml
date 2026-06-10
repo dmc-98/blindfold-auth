@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Blindfold Auth Master Guide
+    url: https://github.com/your-org-or-user/blindfold-auth/blob/main/docs/MASTER_GUIDE.md
+    about: Start here for setup, deployment, and troubleshooting.
+  - name: Security reporting
+    url: https://github.com/your-org-or-user/blindfold-auth/blob/main/SECURITY.md
+    about: Use the private security process for vulnerabilities.

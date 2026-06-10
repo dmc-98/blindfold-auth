@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+coverage
+.blindfold
+.env
+examples/postgres-workspace/.env
+output/playwright
+playwright-report
+test-results
+dist
+dist-tools
+*.tsbuildinfo

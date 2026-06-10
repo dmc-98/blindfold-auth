@@ -1,0 +1,27 @@
+{
+  "name": "@blindfold/playground",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interactive playground for Blindfold Auth: try login, RBAC/ABAC decisions with field masking, sessions, and copy-paste snippets in the browser.",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./server": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./dist/src/server.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test dist/test/*.test.js",
+    "build": "tsc -p .",
+    "pretest": "npm run build"
+  },
+  "dependencies": {
+    "@blindfold/auth": "0.1.0",
+    "@blindfold/client": "0.1.0"
+  },
+  "types": "dist/src/index.d.ts"
+}

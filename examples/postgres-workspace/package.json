@@ -1,0 +1,20 @@
+{
+  "name": "@blindfold/example-postgres-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docker:up": "docker compose up -d postgres",
+    "docker:down": "docker compose down",
+    "migrate": "node ../../packages/auth-cli/bin/blindfold-auth.js migrate --config ./blindfold.config.js",
+    "bootstrap": "node ../../packages/auth-cli/bin/blindfold-auth.js bootstrap --config ./blindfold.config.js --workspace-name \"Blindfold Postgres Workspace\"",
+    "studio": "node ../../packages/auth-cli/bin/blindfold-auth.js studio --config ./blindfold.config.js --port ${BLINDFOLD_STUDIO_PORT:-4110}",
+    "smoke": "node ./smoke.mjs",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@blindfold/auth": "0.1.0",
+    "@blindfold/auth-storage-postgres": "0.1.0",
+    "pg": "^8.13.3"
+  }
+}
