@@ -18,7 +18,7 @@
     "build:tools": "tsc -p ./tsconfig.tools.json",
     "build:ts": "npm run build:packages && npm run build:examples && npm run build:tools",
     "test:unit": "node --test packages/*/dist/test/*.test.js",
-    "test:e2e": "npm run build:packages && npm run build:tools && node --test dist-tools/e2e/*.e2e.test.js",
+    "test:e2e": "npm run build:ts && node --test dist-tools/e2e/*.e2e.test.js",
     "test:all": "npm run test:unit && npm run test:e2e",
     "perf:bench": "node ./dist-tools/benchmarks/auth.perf.js",
     "playwright:install": "npx playwright install chromium",
