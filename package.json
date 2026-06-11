@@ -43,6 +43,6 @@
     "gifenc": "^1.0.3",
     "playwright": "^1.60.0",
     "pngjs": "^7.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
