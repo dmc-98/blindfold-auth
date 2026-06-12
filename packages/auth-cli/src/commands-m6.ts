@@ -1,6 +1,7 @@
 import { createControlPlane, createFileStore } from "@dmc--98/blindfold-control";
 import { generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 import { runDoctor } from "@dmc--98/blindfold-mcp/doctor";
+import { scanSecurityConfig, hasCriticalFinding } from "./security-scan.js";
 
 interface Io {
   log: (...args: any[]) => void;
@@ -143,14 +144,44 @@ export async function playgroundCommand(argv: string[], io: Io = console): Promi
   return pg;
 }
 
-/** `blindfold doctor` — run the nine-step smoke and report. */
-export async function doctorCommand(_argv: string[], io: Io = console): Promise<number> {
-  const report = await runDoctor();
-  for (const step of report.steps) {
-    io.log(`${step.ok ? "✓" : "✗"} ${step.name}${step.ok ? "" : `  — ${step.error}`}`);
+/**
+ * `blindfold doctor` — two halves of deployment health:
+ *  1. runtime smoke (nine-step login/authz sequence proving the integration works)
+ *  2. security configuration scan (proving the deployment isn't footgunned)
+ * Flags: --security-only skips the smoke. The env map is injectable for tests.
+ */
+export async function doctorCommand(
+  argv: string[],
+  io: Io = console,
+  env: Record<string, string | undefined> = process.env
+): Promise<number> {
+  const securityOnly = argv.includes("--security-only");
+
+  let smokeOk = true;
+  if (!securityOnly) {
+    const report = await runDoctor();
+    for (const step of report.steps) {
+      io.log(`${step.ok ? "✓" : "✗"} ${step.name}${step.ok ? "" : `  — ${step.error}`}`);
+    }
+    io.log(`\nSmoke: ${report.passed}/${report.total} checks passed — ${report.ok ? "HEALTHY" : "FAILED"}`);
+    smokeOk = report.ok;
   }
-  io.log(`\nDoctor: ${report.passed}/${report.total} checks passed — ${report.ok ? "HEALTHY" : "FAILED"}`);
-  return report.ok ? 0 : 1;
+
+  const findings = scanSecurityConfig(env);
+  io.log(`\nSecurity configuration scan (${findings.length} finding${findings.length === 1 ? "" : "s"}):`);
+  if (findings.length === 0) {
+    io.log("✓ No misconfigurations detected — secrets, database transport, and Studio exposure look hardened.");
+  } else {
+    for (const f of findings) {
+      const icon = f.severity === "critical" ? "✗" : f.severity === "warning" ? "!" : "·";
+      io.log(`${icon} [${f.severity}] ${f.code}: ${f.message}`);
+      io.log(`    fix: ${f.fix}`);
+    }
+  }
+
+  const ok = smokeOk && !hasCriticalFinding(findings);
+  io.log(`\nDoctor: ${ok ? "HEALTHY" : "FAILED"}`);
+  return ok ? 0 : 1;
 }
 
 export const M6_COMMANDS: Record<string, (argv: string[], io?: Io) => Promise<any>> = {

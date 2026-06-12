@@ -38,11 +38,24 @@ test("project + keys lifecycle through the CLI", async () => {
   assert.match(io3.text(), /active/);
 });
 
-test("doctor runs the nine-step smoke and reports healthy", async () => {
-  const io = fakeIo();
-  const code = await runCli(["doctor"], io);
-  assert.equal(code, 0);
-  assert.match(io.text(), /HEALTHY/);
+test("doctor runs the nine-step smoke and the security scan", async () => {
+  // The CLI path reads process.env for the security scan; harden it for the
+  // duration so the smoke's health is what decides the exit code.
+  const saved = { ...process.env };
+  process.env.BLINDFOLD_SECRET = "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9";
+  delete process.env.BLINDFOLD_DATABASE_URL;
+  delete process.env.NODE_ENV;
+  delete process.env.BLINDFOLD_STUDIO_HOST;
+  try {
+    const io = fakeIo();
+    const code = await runCli(["doctor"], io);
+    assert.equal(code, 0);
+    assert.match(io.text(), /Smoke: \d+\/\d+ checks passed — HEALTHY/);
+    assert.match(io.text(), /Security configuration scan/);
+    assert.match(io.text(), /Doctor: HEALTHY/);
+  } finally {
+    process.env = saved;
+  }
 });
 
 test("help still works and lists the new commands", async () => {
