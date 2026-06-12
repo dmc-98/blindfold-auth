@@ -170,3 +170,6 @@ export async function createTestAuth(options: Record<string, any> = {}): Promise
 
 export { blindfold } from "@dmc--98/blindfold-client";
 export { runStorageConformance } from "./storage-conformance.js";
+
+export { runPolicySuite } from "./policy-suite.js";
+export type { PolicyCase, PolicyCaseResult, PolicySuiteReport, ExpectedDecision } from "./policy-suite.js";
