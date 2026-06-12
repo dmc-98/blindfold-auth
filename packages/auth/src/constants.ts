@@ -38,7 +38,14 @@ export const DEFAULT_SECURITY_CONFIG = {
   magicLinks: {
     returnTokenInResponse: false,
     requireRelativeRedirects: true
-  }
+  },
+  /**
+   * Opt-in HIBP k-anonymity breach check on registration/password set.
+   * true for defaults, or an options object ({ fetchImpl, apiBase,
+   * timeoutMs }) passed through to checkPasswordBreached. Fail-open on
+   * HIBP outages by design.
+   */
+  breachPasswordCheck: false
 };
 
 export const DEFAULT_AUTH_METHODS = {

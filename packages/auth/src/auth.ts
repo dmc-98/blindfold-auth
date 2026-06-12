@@ -9,6 +9,7 @@ import {
   registrationInfoToCredentialRecord
 } from "./passkeys.js";
 import { evaluatePolicies, explainPolicies } from "./policy.js";
+import { checkPasswordBreached } from "./breach-check.js";
 import { createSamlClient, samlProfileToClaims } from "./saml.js";
 import { createFileStorage, createMemoryStorage } from "./storage.js";
 import { generateRecoveryCodes, generateTotpSecret, getTotpCode, verifyTotpCode } from "./totp.js";
@@ -1887,6 +1888,14 @@ export function createAuth({
         const existingPrincipal = await getPrincipalByEmail(normalizedEmail);
         if (existingPrincipal) {
           throw new Error("Principal email already exists");
+        }
+
+        if (password && securityConfig.breachPasswordCheck) {
+          const breachOptions = securityConfig.breachPasswordCheck === true ? {} : securityConfig.breachPasswordCheck;
+          const breach = await checkPasswordBreached(password, breachOptions);
+          if (breach.breached) {
+            throw new Error(`Password rejected: it appears in ${breach.count} known data breaches. Choose a different password.`);
+          }
         }
 
         const principal = withTimestamps(

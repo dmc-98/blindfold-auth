@@ -39,3 +39,29 @@ test("fail-open by default with a checked:false marker when HIBP is unreachable"
   assert.equal(result.checked, false);
   assert.equal(result.breached, false);
 });
+
+// ── registration wiring ───────────────────────────────────────────────────────
+import { createAuth } from "../src/auth.js";
+
+test("opt-in breachPasswordCheck rejects breached passwords at registration", async () => {
+  const { fetchImpl } = fakeHibp("pw-123456", 1200);
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { breachPasswordCheck: { fetchImpl } },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "Breach WS" });
+  await assert.rejects(
+    () => auth.admin.principals.create({ email: "victim@x.com", password: "pw-123456", displayName: "V" }),
+    /known data breaches/
+  );
+  // A clean password registers fine through the same path.
+  const ok = await auth.admin.principals.create({ email: "safe@x.com", password: "uncommon-pass-77!", displayName: "S" });
+  assert.ok(ok.id);
+});
+
+test("breach check is off by default — breached passwords register (back-compat)", async () => {
+  const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
+  await auth.admin.bootstrapWorkspace({ name: "Default WS" });
+  const created = await auth.admin.principals.create({ email: "legacy@x.com", password: "pw-123456", displayName: "L" });
+  assert.ok(created.id);
+});
