@@ -338,6 +338,31 @@ highlighted.
    id in production. Every finding includes a concrete fix. Use
    `--security-only` in CI to lint a deployment env without the smoke.
 
+## SSO preflight: blindfold sso doctor
+
+`blindfold sso doctor --url <metadata-url> | --file <path>` statically
+analyzes IdP metadata before you wire a provider — the checks that
+otherwise burn the first half hour of an SSO integration:
+
+- OIDC discovery: required endpoints present and https-only, `alg:none`
+  rejected, PKCE S256 advertised
+- SAML metadata: entityID, signing certificate present, **certificate
+  expiry** (critical when expired, warning under 30 days), SSO bindings
+- URL fetches go through an SSRF guard: https-only, private/loopback hosts
+  refused, no redirects, 1MB/10s caps
+
+Criticals exit 1, so the command slots into CI as an SSO-config lint.
+
+## Breach-password protection (opt-in)
+
+`security: { breachPasswordCheck: true }` on `createAuth` checks new
+passwords against HIBP Pwned Passwords using k-anonymity — only the first
+5 characters of the SHA-1 ever leave the process. Breached passwords are
+rejected at registration with the breach count; HIBP outages fail open so
+registration is never blocked by a third party. Pass an options object
+(`fetchImpl`, `apiBase`, `timeoutMs`) to proxy or test. The standalone
+`checkPasswordBreached()` is exported for custom flows.
+
 ## Smoke test checklist
 
 Every deploy path should pass the same basic smoke checks:
