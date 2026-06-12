@@ -1525,8 +1525,9 @@ export function createAuth({
     request = {},
     principal: preloadedPrincipal = null,
     application: preloadedApplication = null,
-    includeTrace = false
-  }: { principalId: any; applicationId: any; action: any; resource: any; field?: any; tenantId?: any; resourceAttributes?: any; request?: any; principal?: any; application?: any; includeTrace?: boolean }) {
+    includeTrace = false,
+    policiesTransform = null
+  }: { principalId: any; applicationId: any; action: any; resource: any; field?: any; tenantId?: any; resourceAttributes?: any; request?: any; principal?: any; application?: any; includeTrace?: boolean; policiesTransform?: ((policies: any[]) => any[]) | null }) {
     const application = preloadedApplication || (await getApplication(applicationId));
     const principal = preloadedPrincipal || (await storage.get("principals", principalId));
     const hardDenyReasons = [];
@@ -1543,7 +1544,10 @@ export function createAuth({
     const roleIds = memberships.map((membership: any) => membership.roleId).filter(Boolean);
     const rolePermissions = await getRolePermissions(roleIds, applicationId);
     const directGrants = await getDirectGrants(principalId, applicationId);
-    const policies = await getPolicies(applicationId);
+    const storedPolicies = await getPolicies(applicationId);
+    // What-if overlay (dry runs): evaluate against a transformed rule set
+    // without touching storage.
+    const policies = policiesTransform ? policiesTransform(storedPolicies) : storedPolicies;
 
     const context = {
       subject: {
@@ -2102,6 +2106,46 @@ export function createAuth({
     policies: {
       async list({ applicationId }: { applicationId: any }) {
         return storage.list("policy_rules", { applicationId });
+      },
+      /**
+       * What-if evaluation: replay queries against the live rule set with
+       * proposed additions/removals overlaid - nothing is persisted.
+       * Returns before/after decisions per case plus a changed summary.
+       */
+      async dryRun({
+        applicationId,
+        addPolicies = [],
+        removePolicyIds = [],
+        cases = []
+      }: { applicationId: any; addPolicies?: any[]; removePolicyIds?: any[]; cases?: any[] }) {
+        const removed = new Set(removePolicyIds);
+        const transform = (policies: any[]) => [
+          ...policies.filter((rule: any) => !removed.has(rule.id)),
+          ...addPolicies
+        ];
+        const decisionKey = (d: any) =>
+          JSON.stringify([d.allowed, d.effect, [...(d.obligations?.maskedFields ?? [])].sort(), [...(d.obligations?.readonlyFields ?? [])].sort()]);
+
+        const results = [];
+        for (const c of cases) {
+          const base = {
+            principalId: c.principalId,
+            applicationId,
+            action: c.action,
+            resource: c.resource,
+            field: c.field ?? null,
+            tenantId: c.tenantId ?? null,
+            resourceAttributes: c.resourceAttributes || {},
+            request: c.request || {}
+          };
+          const before = await evaluateAuthorization(base);
+          const after = await evaluateAuthorization({ ...base, policiesTransform: transform });
+          results.push({ query: c, before, after, changed: decisionKey(before) !== decisionKey(after) });
+        }
+        return {
+          cases: results,
+          summary: { total: results.length, changed: results.filter((r) => r.changed).length }
+        };
       },
       async add({
         applicationId,
