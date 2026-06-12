@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-auth-storage-postgres",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "dist/src/index.js",
   "exports": {
@@ -10,7 +10,7 @@
     }
   },
   "dependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1"
   },
   "types": "dist/src/index.d.ts",
   "scripts": {
@@ -26,5 +26,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

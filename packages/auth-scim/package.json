@@ -1,14 +1,14 @@
 {
   "name": "@dmc--98/blindfold-scim",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "type": "module",
   "description": "SCIM 2.0 user provisioning + compliance export for Blindfold Auth. Wraps the engine admin API as the standard /Users, /Groups, and /ServiceProviderConfig endpoints; emits NDJSON / JSON compliance exports of principals, memberships, and audit events.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     }
   },
   "scripts": {
@@ -17,7 +17,7 @@
     "test": "node --test dist/test/*.test.js"
   },
   "peerDependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

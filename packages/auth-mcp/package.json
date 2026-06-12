@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "MCP server for Blindfold Auth: lets an agent or IDE create projects, issue keys, configure roles/policies, and generate integration snippets.",
   "main": "dist/src/index.js",
@@ -23,9 +23,9 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0",
-    "@dmc--98/blindfold-client": "0.1.0",
-    "@dmc--98/blindfold-control": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1",
+    "@dmc--98/blindfold-client": "0.1.1",
+    "@dmc--98/blindfold-control": "0.1.1"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1"
@@ -44,5 +44,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

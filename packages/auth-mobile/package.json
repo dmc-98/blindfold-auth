@@ -1,14 +1,14 @@
 {
   "name": "@dmc--98/blindfold-mobile",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "type": "module",
   "description": "Mobile-friendly Blindfold Auth client: PKCE S256 helpers, pluggable secure token storage, login + rotating refresh + logout, ready to drop into React Native / Swift / Kotlin via HTTP.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     }
   },
   "scripts": {
@@ -17,7 +17,7 @@
     "test": "node --test dist/test/*.test.js"
   },
   "peerDependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

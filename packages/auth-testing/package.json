@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Test helpers for Blindfold Auth: zero-dependency in-memory test mode, seed factories, session minting, and RBAC/ABAC assertions.",
   "main": "dist/src/index.js",
@@ -20,8 +20,8 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0",
-    "@dmc--98/blindfold-client": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1",
+    "@dmc--98/blindfold-client": "0.1.1"
   },
   "types": "dist/src/index.d.ts",
   "repository": {
@@ -32,5 +32,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

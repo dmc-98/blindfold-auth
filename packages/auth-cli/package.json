@@ -1,17 +1,17 @@
 {
   "name": "@dmc--98/blindfold-auth-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "bin": {
     "blindfold-auth": "dist/bin/blindfold-auth.js"
   },
   "dependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0",
-    "@dmc--98/blindfold-auth-studio": "0.1.0",
-    "@dmc--98/blindfold-client": "0.1.0",
-    "@dmc--98/blindfold-control": "0.1.0",
-    "@dmc--98/blindfold-mcp": "0.1.0",
-    "@dmc--98/blindfold-playground": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1",
+    "@dmc--98/blindfold-auth-studio": "0.1.1",
+    "@dmc--98/blindfold-client": "0.1.1",
+    "@dmc--98/blindfold-control": "0.1.1",
+    "@dmc--98/blindfold-mcp": "0.1.1",
+    "@dmc--98/blindfold-playground": "0.1.1"
   },
   "scripts": {
     "build": "tsc -p .",
@@ -26,5 +26,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

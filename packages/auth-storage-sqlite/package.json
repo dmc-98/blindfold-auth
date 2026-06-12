@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-auth-storage-sqlite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "SQLite storage adapter for Blindfold Auth using Node's built-in node:sqlite. Great for local development, tests, and edge/single-node deployments.",
   "main": "dist/src/index.js",
@@ -16,7 +16,7 @@
     "pretest": "npm run build"
   },
   "peerDependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.1"
   },
   "engines": {
     "node": ">=22.5.0"
@@ -30,5 +30,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

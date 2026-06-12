@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-auth-storage-mongo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "MongoDB (NoSQL) storage adapter for Blindfold Auth. Maps each auth table to a collection of documents.",
   "main": "dist/src/index.js",
@@ -20,7 +20,7 @@
     "pretest": "npm run build"
   },
   "peerDependencies": {
-    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-auth": "0.1.1",
     "mongodb": ">=5"
   },
   "peerDependenciesMeta": {
@@ -37,5 +37,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }

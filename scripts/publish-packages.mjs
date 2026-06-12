@@ -44,6 +44,25 @@ const isOnRegistry = (name, version) => {
   }
 }
 
+/**
+ * Guard against publishing a tarball without its build output (the v0.1.0
+ * incident: no `files` field meant npm fell back to .gitignore, which
+ * excludes dist/). Asserts that the package entry point and every bin
+ * script are actually inside the pack file list.
+ */
+const assertTarballComplete = (pkg, pkgPath) => {
+  const out = execFileSync('npm', ['pack', '--dry-run', '--json'], { cwd: pkgPath, stdio: 'pipe' }).toString()
+  const files = new Set(JSON.parse(out)[0].files.map((f) => f.path.replace(/^\.\//, '')))
+  const required = []
+  if (pkg.main) required.push(pkg.main.replace(/^\.\//, ''))
+  if (typeof pkg.bin === 'string') required.push(pkg.bin.replace(/^\.\//, ''))
+  else if (pkg.bin) required.push(...Object.values(pkg.bin).map((b) => b.replace(/^\.\//, '')))
+  const missing = required.filter((f) => !files.has(f))
+  if (missing.length > 0) {
+    throw new Error(`tarball for ${pkg.name} is missing required files: ${missing.join(', ')} — did the build run? Is the "files" field correct?`)
+  }
+}
+
 let published = 0
 let skipped = 0
 const failures = []
@@ -61,6 +80,7 @@ for (const dir of ordered) {
   if (useProvenance) args.push('--provenance')
   if (dryRun) args.push('--dry-run')
   try {
+    assertTarballComplete(pkg, pkgPath)
     console.log(`→ publishing ${pkg.name}@${pkg.version}${dryRun ? ' (dry-run)' : ''}`)
     execFileSync('npm', args, { cwd: pkgPath, stdio: 'inherit' })
     published += 1

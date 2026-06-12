@@ -1,6 +1,6 @@
 {
   "name": "@dmc--98/blindfold-control",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Multi-project control plane for Blindfold Auth: a registry of projects and hashed API keys so many products share one auth control plane safely.",
   "main": "dist/src/index.js",
@@ -24,5 +24,9 @@
   "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
   "bugs": {
     "url": "https://github.com/dmc-98/blindfold-auth/issues"
-  }
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ]
 }
