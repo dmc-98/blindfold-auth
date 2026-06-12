@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { chromium } from "playwright";
-import { createAuth, createMemoryStorage, getTotpCode } from "@blindfold/auth";
-import { startStudio } from "@blindfold/auth-studio";
+import { createAuth, createMemoryStorage, getTotpCode } from "@dmc--98/blindfold-auth";
+import { startStudio } from "@dmc--98/blindfold-auth-studio";
 
 function json(statusCode: number, payload: any) {
   return {

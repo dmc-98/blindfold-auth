@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createDemoServer } from "@blindfold/example-demo-app";
+import { createDemoServer } from "@dmc--98/blindfold-example-demo-app";
 
 const out = resolve(dirname(fileURLToPath(import.meta.url)), "../output");
 const srv = await createDemoServer({ storage: "memory" });

@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/control",
+  "name": "@dmc--98/blindfold-control",
   "version": "0.1.0",
   "type": "module",
   "description": "Multi-project control plane for Blindfold Auth: a registry of projects and hashed API keys so many products share one auth control plane safely.",

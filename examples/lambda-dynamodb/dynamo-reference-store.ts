@@ -1,5 +1,5 @@
-import { TABLES } from "@blindfold/auth";
-import type { Storage } from "@blindfold/auth";
+import { TABLES } from "@dmc--98/blindfold-auth";
+import type { Storage } from "@dmc--98/blindfold-auth";
 
 export interface DynamoReferenceStoreOptions {
   client: any;

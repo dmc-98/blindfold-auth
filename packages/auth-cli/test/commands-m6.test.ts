@@ -18,7 +18,7 @@ test("add-auth prints a few-lines integration snippet (no config required)", asy
   const io = fakeIo();
   const code = await runCli(["add-auth", "--framework", "express", "--project", "shop"], io);
   assert.equal(code, 0);
-  assert.match(io.text(), /@blindfold\/client/);
+  assert.match(io.text(), /@dmc--98\/blindfold-client/);
   assert.match(io.text(), /blindfoldExpress/);
 });
 

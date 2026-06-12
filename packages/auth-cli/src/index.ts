@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { startStudio } from "@blindfold/auth-studio";
+import { startStudio } from "@dmc--98/blindfold-auth-studio";
 import { M6_COMMANDS } from "./commands-m6.js";
 
 interface Io {

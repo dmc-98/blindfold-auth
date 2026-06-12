@@ -1,17 +1,17 @@
 {
-  "name": "@blindfold/auth-cli",
+  "name": "@dmc--98/blindfold-auth-cli",
   "version": "0.1.0",
   "type": "module",
   "bin": {
     "blindfold-auth": "dist/bin/blindfold-auth.js"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/auth-studio": "0.1.0",
-    "@blindfold/client": "0.1.0",
-    "@blindfold/control": "0.1.0",
-    "@blindfold/mcp": "0.1.0",
-    "@blindfold/playground": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-auth-studio": "0.1.0",
+    "@dmc--98/blindfold-client": "0.1.0",
+    "@dmc--98/blindfold-control": "0.1.0",
+    "@dmc--98/blindfold-mcp": "0.1.0",
+    "@dmc--98/blindfold-playground": "0.1.0"
   },
   "scripts": {
     "build": "tsc -p .",

@@ -1,5 +1,5 @@
 /**
- * @blindfold/sso — versioned public SSO contract for Blindfold Auth.
+ * @dmc--98/blindfold-sso — versioned public SSO contract for Blindfold Auth.
  *
  * The engine has shipped OIDC + SAML federation since M1. This package
  * **freezes** the public surface as the v1 contract: stable type signatures,

@@ -22,7 +22,7 @@ Priority:
 
 Expected shape:
 
-- Node.js host app embeds `@blindfold/auth`
+- Node.js host app embeds `@dmc--98/blindfold-auth`
 - PostgreSQL stores the auth workspace
 - Studio is started locally through the CLI
 - config is loaded through the standardized Blindfold env names

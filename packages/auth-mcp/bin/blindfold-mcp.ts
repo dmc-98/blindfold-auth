@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createMcpServer } from "../src/index.js";
-import { createControlPlane, createFileStore } from "@blindfold/control";
+import { createControlPlane, createFileStore } from "@dmc--98/blindfold-control";
 
 /**
  * stdio entry for the Blindfold MCP server. Persists the control plane to a

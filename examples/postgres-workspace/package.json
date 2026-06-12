@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/example-postgres-workspace",
+  "name": "@dmc--98/blindfold-example-postgres-workspace",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
     "build": "tsc -p ."
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/auth-storage-postgres": "0.1.0",
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-auth-storage-postgres": "0.1.0",
     "pg": "^8.21.0"
   }
 }

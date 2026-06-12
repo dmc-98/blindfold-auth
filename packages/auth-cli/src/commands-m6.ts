@@ -1,6 +1,6 @@
-import { createControlPlane, createFileStore } from "@blindfold/control";
-import { generateSnippet, SNIPPET_FRAMEWORKS } from "@blindfold/client";
-import { runDoctor } from "@blindfold/mcp/doctor";
+import { createControlPlane, createFileStore } from "@dmc--98/blindfold-control";
+import { generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
+import { runDoctor } from "@dmc--98/blindfold-mcp/doctor";
 
 interface Io {
   log: (...args: any[]) => void;
@@ -33,7 +33,7 @@ export async function addAuthCommand(argv: string[], io: Io = console): Promise<
     return 1;
   }
   io.log(`# Add Blindfold Auth to a ${framework} app (project: ${project}, storage: ${storage})`);
-  io.log(`# 1) npm i @blindfold/client @blindfold/auth`);
+  io.log(`# 1) npm i @dmc--98/blindfold-client @dmc--98/blindfold-auth`);
   io.log(`# 2) export BLINDFOLD_SECRET=$(openssl rand -hex 32)`);
   io.log(`# 3) paste:\n`);
   io.log(generateSnippet({ framework, project, storage }));
@@ -133,7 +133,7 @@ export async function playgroundCommand(argv: string[], io: Io = console): Promi
   const port = Number(readFlag(argv, "--port", "4120"));
   const host = readFlag(argv, "--host", "127.0.0.1");
   const storage = readFlag(argv, "--storage", "memory");
-  const { createPlaygroundServer } = await import("@blindfold/playground/server");
+  const { createPlaygroundServer } = await import("@dmc--98/blindfold-playground/server");
   const pg = await createPlaygroundServer({ storage });
   const { url } = await pg.listen(port, host);
   io.log(`Blindfold Playground running at ${url} (storage: ${storage})`);

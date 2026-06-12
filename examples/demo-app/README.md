@@ -2,7 +2,7 @@
 
 A complete, runnable full-stack app that proves Blindfold Auth in a real product:
 **password login + sessions, RBAC, and ABAC field-level masking** — all enforced
-server-side by `@blindfold/client` / `@blindfold/auth`.
+server-side by `@dmc--98/blindfold-client` / `@dmc--98/blindfold-auth`.
 
 ## Run it
 

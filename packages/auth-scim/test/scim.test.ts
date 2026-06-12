@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 // @ts-ignore - plain JS package
-import * as authPkg from "@blindfold/auth";
+import * as authPkg from "@dmc--98/blindfold-auth";
 import { createScimServer, SCIM_VERSION, SCIM_SCHEMAS, ScimEngine, ScimUser, ScimListResponse } from "../src/index.js";
 
 const createAuth = (authPkg as any).createAuth as (opts: any) => any;

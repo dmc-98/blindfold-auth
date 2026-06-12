@@ -36,8 +36,8 @@ These helpers should be the default way to read and validate deployment env vars
 ## Recommended embedded config shape
 
 ```js
-import { assertBlindfoldEnv, createAuth, loadBlindfoldEnv } from "@blindfold/auth";
-import { createPostgresStorage } from "@blindfold/auth-storage-postgres";
+import { assertBlindfoldEnv, createAuth, loadBlindfoldEnv } from "@dmc--98/blindfold-auth";
+import { createPostgresStorage } from "@dmc--98/blindfold-auth-storage-postgres";
 
 const env = assertBlindfoldEnv(loadBlindfoldEnv(), { requireDatabaseUrl: true });
 

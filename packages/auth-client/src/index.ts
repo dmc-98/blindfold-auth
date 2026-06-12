@@ -1,9 +1,9 @@
-import { createAuth } from "@blindfold/auth";
-import type { Storage } from "@blindfold/auth";
+import { createAuth } from "@dmc--98/blindfold-auth";
+import type { Storage } from "@dmc--98/blindfold-auth";
 import { resolveStorage, isStorageAdapter } from "./storage.js";
 
 /**
- * @blindfold/client — the drop-in SDK.
+ * @dmc--98/blindfold-client — the drop-in SDK.
  *
  * Goal (M1): reduce integration to a few lines while exposing the full engine:
  * authn, RBAC + ABAC (M2), sessions, and the prebuilt auth handlers.
@@ -45,7 +45,7 @@ export async function blindfold(config: Record<string, any> = {}): Promise<Recor
   });
 
   const client = {
-    /** The underlying @blindfold/auth instance — full escape hatch. */
+    /** The underlying @dmc--98/blindfold-auth instance — full escape hatch. */
     auth,
     project: project || null,
     mode: mode || "default",

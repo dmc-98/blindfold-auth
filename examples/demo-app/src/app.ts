@@ -1,9 +1,9 @@
 // Upstream packages are still plain JS (migration in progress). Cast their
 // public surface to `any` locally so the demo can be strict-TS without
 // blocking on typing the entire workspace.
-import { blindfold as blindfoldRaw } from "@blindfold/client";
-import { maskValue as maskValueRaw } from "@blindfold/auth";
-import { createRiskEngine as createRiskEngineRaw } from "@blindfold/risk";
+import { blindfold as blindfoldRaw } from "@dmc--98/blindfold-client";
+import { maskValue as maskValueRaw } from "@dmc--98/blindfold-auth";
+import { createRiskEngine as createRiskEngineRaw } from "@dmc--98/blindfold-risk";
 
 const blindfold = blindfoldRaw as unknown as (opts: { project: string; secret: string; storage: string }) => Promise<any>;
 const maskValue = maskValueRaw as unknown as (v: string) => string;

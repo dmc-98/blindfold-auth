@@ -1,13 +1,13 @@
 /**
- * Express adapter for @blindfold/client.
+ * Express adapter for @dmc--98/blindfold-client.
  *
  * Translates Express req/res into the normalized request/response shape the
  * Blindfold runtime expects, and mounts the prebuilt auth routes. Keeps app
  * integration to a few lines:
  *
  *   import express from "express";
- *   import { blindfold } from "@blindfold/client";
- *   import { blindfoldExpress } from "@blindfold/client/express";
+ *   import { blindfold } from "@dmc--98/blindfold-client";
+ *   import { blindfoldExpress } from "@dmc--98/blindfold-client/express";
  *
  *   const auth = await blindfold({ project: "my-app", secret });
  *   const app = express();

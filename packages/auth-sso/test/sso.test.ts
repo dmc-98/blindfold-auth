@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-// @ts-ignore -- @blindfold/auth is plain JS; the inferred types are too narrow.
-import * as authPkg from "@blindfold/auth";
+// @ts-ignore -- @dmc--98/blindfold-auth is plain JS; the inferred types are too narrow.
+import * as authPkg from "@dmc--98/blindfold-auth";
 const createAuth = (authPkg as any).createAuth as (opts: any) => any;
 const createMemoryStorage = (authPkg as any).createMemoryStorage as () => any;
 import { createSso, SSO_VERSION, SsoEngine } from "../src/index.js";

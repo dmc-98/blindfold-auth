@@ -1,10 +1,10 @@
-import { createControlPlane, createMemoryStore } from "@blindfold/control";
-import type { Project } from "@blindfold/control";
-import { blindfold, generateSnippet, SNIPPET_FRAMEWORKS } from "@blindfold/client";
+import { createControlPlane, createMemoryStore } from "@dmc--98/blindfold-control";
+import type { Project } from "@dmc--98/blindfold-control";
+import { blindfold, generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 import { runDoctor } from "./doctor.js";
 
 /**
- * @blindfold/mcp — the agent/IDE distribution surface.
+ * @dmc--98/blindfold-mcp — the agent/IDE distribution surface.
  *
  * Exposes Blindfold as a set of MCP tools so an assistant can wire auth into any
  * product conversationally: create a project, issue a key, define roles, generate

@@ -23,11 +23,11 @@ The current repository is built around:
 
 Available now in the repository:
 
-- `@blindfold/auth` runtime
-- `@blindfold/auth-cli`
-- `@blindfold/auth-studio`
-- `@blindfold/auth-storage-postgres`
-- `@blindfold/auth-adapter-serverless`
+- `@dmc--98/blindfold-auth` runtime
+- `@dmc--98/blindfold-auth-cli`
+- `@dmc--98/blindfold-auth-studio`
+- `@dmc--98/blindfold-auth-storage-postgres`
+- `@dmc--98/blindfold-auth-adapter-serverless`
 - `examples/local-workspace`
 - `examples/postgres-workspace`
 - `examples/lambda-dynamodb`
@@ -156,7 +156,7 @@ This is the path the product should optimize for first.
 
 ### Recommended production architecture
 
-- Application runtime embeds `@blindfold/auth`
+- Application runtime embeds `@dmc--98/blindfold-auth`
 - PostgreSQL stores the auth workspace tables
 - Studio runs locally through the CLI and connects to the same workspace
 - App routes use `auth.protect()` and `auth.can()`

@@ -13,11 +13,11 @@ Start here:
 
 The current implementation in this repository ships:
 
-- `@blindfold/auth`: embedded auth runtime with sessions, RBAC/ABAC, audit logging, rate limiting, and admin APIs
-- `@blindfold/auth-cli`: CLI for bootstrapping a workspace and launching Studio locally
-- `@blindfold/auth-studio`: local web Studio for configuration, users, policies, and debugging
-- `@blindfold/auth-storage-postgres`: PostgreSQL document-table adapter and schema SQL
-- `@blindfold/auth-adapter-serverless`: API Gateway and Lambda integration helpers
+- `@dmc--98/blindfold-auth`: embedded auth runtime with sessions, RBAC/ABAC, audit logging, rate limiting, and admin APIs
+- `@dmc--98/blindfold-auth-cli`: CLI for bootstrapping a workspace and launching Studio locally
+- `@dmc--98/blindfold-auth-studio`: local web Studio for configuration, users, policies, and debugging
+- `@dmc--98/blindfold-auth-storage-postgres`: PostgreSQL document-table adapter and schema SQL
+- `@dmc--98/blindfold-auth-adapter-serverless`: API Gateway and Lambda integration helpers
 - `examples/local-workspace`: local embedded demo workspace
 - `examples/postgres-workspace`: recommended Node + Postgres deployment example
 - `examples/lambda-dynamodb`: reference Lambda layout for a DynamoDB-backed deployment
@@ -101,10 +101,10 @@ See `docs/MASTER_GUIDE.md` for the full deployment and release checklist.
 
 ## Packages
 
-### `@blindfold/auth`
+### `@dmc--98/blindfold-auth`
 
 ```js
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
 
 const auth = createAuth({
   workspaceId: "workspace_demo",
@@ -121,7 +121,7 @@ The runtime centers on:
 - `auth.session.*`
 - `auth.admin.*`
 
-### `@blindfold/auth-cli`
+### `@dmc--98/blindfold-auth-cli`
 
 ```sh
 # Build the workspace first (TypeScript → dist/), then run the CLI:
@@ -131,15 +131,15 @@ npm run studio:example
 node packages/auth-cli/dist/bin/blindfold-auth.js studio --config ./examples/local-workspace/dist/blindfold.config.js
 ```
 
-### `@blindfold/auth-studio`
+### `@dmc--98/blindfold-auth-studio`
 
 Studio is a local web app started by the CLI. It talks to the embedded runtime through validated admin APIs and includes a basic policy debugger.
 
-### `@blindfold/auth-storage-postgres`
+### `@dmc--98/blindfold-auth-storage-postgres`
 
 The Postgres adapter uses one table per auth domain and stores a document payload in `jsonb`. That keeps the control plane table-driven while leaving room for future indexing and normalization.
 
-### `@blindfold/auth-adapter-serverless`
+### `@dmc--98/blindfold-auth-adapter-serverless`
 
 The serverless adapter wraps the embedded runtime for API Gateway style events and responses.
 

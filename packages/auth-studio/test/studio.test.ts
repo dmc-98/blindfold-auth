@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
 import { startStudio } from "../src/index.js";
 
 test("Studio exposes workspace snapshot and validated admin endpoints", async (t) => {

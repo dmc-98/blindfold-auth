@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/auth",
+  "name": "@dmc--98/blindfold-auth",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/src/index.js",

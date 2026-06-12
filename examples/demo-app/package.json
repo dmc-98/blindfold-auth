@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/example-demo-app",
+  "name": "@dmc--98/blindfold-example-demo-app",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,9 +13,9 @@
     "test": "node --test dist/test/*.test.js"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/client": "0.1.0",
-    "@blindfold/risk": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-client": "0.1.0",
+    "@dmc--98/blindfold-risk": "0.1.0"
   },
   "types": "dist/src/server.d.ts",
   "exports": {

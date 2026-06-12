@@ -59,7 +59,7 @@ test("live authoring: adding a role + policy changes decisions", async () => {
 test("snippet generator returns framework code", async () => {
   const sb = await createSandbox();
   const s = sb.snippet({ framework: "express", storage: "sqlite" });
-  assert.match(s.code, /@blindfold\/client/);
+  assert.match(s.code, /@dmc--98\/blindfold-client/);
   assert.ok(Array.isArray(s.frameworks));
 });
 

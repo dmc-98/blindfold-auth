@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/risk",
+  "name": "@dmc--98/blindfold-risk",
   "version": "0.1.0",
   "type": "module",
   "description": "Adaptive/dynamic security for Blindfold Auth: risk scoring from device, IP, velocity and travel signals, with step-up MFA decisions recorded to risk_events.",
@@ -16,7 +16,7 @@
     "pretest": "npm run build"
   },
   "peerDependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   },
   "types": "dist/src/index.d.ts"
 }

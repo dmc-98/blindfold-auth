@@ -1,11 +1,11 @@
 {
-  "name": "@blindfold/example-lambda-dynamodb",
+  "name": "@dmc--98/blindfold-example-lambda-dynamodb",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/auth-adapter-serverless": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-auth-adapter-serverless": "0.1.0"
   },
   "scripts": {
     "build": "tsc -p ."

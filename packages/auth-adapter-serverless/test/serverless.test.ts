@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
 import { createApiGatewayHandler } from "../src/index.js";
 
 test("Serverless adapter wraps API Gateway routes and protected handlers", async () => {

@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/playground",
+  "name": "@dmc--98/blindfold-playground",
   "version": "0.1.0",
   "type": "module",
   "description": "Interactive playground for Blindfold Auth: try login, RBAC/ABAC decisions with field masking, sessions, and copy-paste snippets in the browser.",
@@ -20,8 +20,8 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/client": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-client": "0.1.0"
   },
   "types": "dist/src/index.d.ts"
 }

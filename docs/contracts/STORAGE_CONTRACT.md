@@ -1,6 +1,6 @@
 # Storage Adapter Contract
 
-This document defines the storage interface expected by `@blindfold/auth`.
+This document defines the storage interface expected by `@dmc--98/blindfold-auth`.
 
 ## Required adapter methods
 

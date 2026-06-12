@@ -1,4 +1,4 @@
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
 
 export default function createLaunchDemoAuth() {
   return createAuth({

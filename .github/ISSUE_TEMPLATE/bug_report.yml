@@ -30,7 +30,7 @@ body:
     id: package
     attributes:
       label: Affected package or example
-      placeholder: '@blindfold/auth, @blindfold/auth-cli, examples/postgres-workspace'
+      placeholder: '@dmc--98/blindfold-auth, @dmc--98/blindfold-auth-cli, examples/postgres-workspace'
     validations:
       required: true
   - type: textarea

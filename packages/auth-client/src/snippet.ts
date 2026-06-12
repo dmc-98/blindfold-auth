@@ -9,7 +9,7 @@ const FRAMEWORKS = ["express", "fastify", "hono", "next"];
 
 function header(project: string, storage: string): string[] {
   return [
-    `import { blindfold } from "@blindfold/client";`,
+    `import { blindfold } from "@dmc--98/blindfold-client";`,
     ``,
     `const auth = await blindfold({`,
     `  project: ${JSON.stringify(project)},`,
@@ -31,7 +31,7 @@ export function generateSnippet({ framework = "express", project = "my-app", sto
     lines.push(
       ``,
       `import express from "express";`,
-      `import { blindfoldExpress, guard } from "@blindfold/client/express";`,
+      `import { blindfoldExpress, guard } from "@dmc--98/blindfold-client/express";`,
       ``,
       `const app = express();`,
       `app.use(express.json());`,

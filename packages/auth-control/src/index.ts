@@ -3,7 +3,7 @@ import { createMemoryStore, createFileStore } from "./stores.js";
 import type { ControlStore } from "./stores.js";
 
 /**
- * @blindfold/control — the multi-project control plane.
+ * @dmc--98/blindfold-control — the multi-project control plane.
  *
  * "One auth system across all my products" is a control-plane trust model, not a
  * single app. This module is the registry: it tracks projects (each maps to a

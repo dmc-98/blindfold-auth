@@ -1,6 +1,6 @@
 import { Pool } from "pg";
-import { assertBlindfoldEnv, createAuth, loadBlindfoldEnv } from "@blindfold/auth";
-import { createPostgresStorage, runPostgresMigrations } from "@blindfold/auth-storage-postgres";
+import { assertBlindfoldEnv, createAuth, loadBlindfoldEnv } from "@dmc--98/blindfold-auth";
+import { createPostgresStorage, runPostgresMigrations } from "@dmc--98/blindfold-auth-storage-postgres";
 
 const env = assertBlindfoldEnv(
   loadBlindfoldEnv({

@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/mobile",
+  "name": "@dmc--98/blindfold-mobile",
   "version": "1.0.0-rc.1",
   "type": "module",
   "description": "Mobile-friendly Blindfold Auth client: PKCE S256 helpers, pluggable secure token storage, login + rotating refresh + logout, ready to drop into React Native / Swift / Kotlin via HTTP.",
@@ -14,6 +14,6 @@
     "test": "node --test dist/test/*.test.js"
   },
   "peerDependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   }
 }

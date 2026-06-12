@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import { createMcpTools, listToolDefs, runDoctor } from "../src/index.js";
-import { generateSnippet, SNIPPET_FRAMEWORKS } from "@blindfold/client";
+import { generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 
 test("generateSnippet produces few-lines code per framework", () => {
   for (const fw of SNIPPET_FRAMEWORKS) {
     const code = generateSnippet({ framework: fw, project: "p", storage: "postgres" });
-    assert.match(code, /@blindfold\/client/);
+    assert.match(code, /@dmc--98\/blindfold-client/);
     assert.ok(code.length > 50);
   }
   assert.throws(() => generateSnippet({ framework: "django" }), /Unknown framework/);
@@ -35,7 +35,7 @@ test("MCP tools: create project, list, issue key, generate snippet", async () =>
 test("MCP define_role wires roles through a project's cached runtime client", async () => {
   // Inject a shared in-memory client so we can bootstrap an app, then define a
   // role against it through the MCP tool — proving the cached-client wiring.
-  const { blindfold } = await import("@blindfold/client");
+  const { blindfold } = await import("@dmc--98/blindfold-client");
   const shared = await blindfold({ project: "role_ws", secret: "s", storage: "memory" });
   await shared.admin.bootstrapWorkspace({ name: "Role WS" });
   const app = await shared.admin.applications.create({ slug: "role-app", name: "Role App" });

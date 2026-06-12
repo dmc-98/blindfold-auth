@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { createMemoryStorage } from "@blindfold/auth";
+import { createMemoryStorage } from "@dmc--98/blindfold-auth";
 import { createRiskEngine } from "../src/index.js";
 import type { RiskConfig } from "../src/index.js";
 
@@ -100,7 +100,7 @@ test("enforceStepUp gates until MFA is verified", async () => {
 });
 
 test("integrates over a live blindfold runtime instance", async () => {
-  const { blindfold } = await import("@blindfold/client");
+  const { blindfold } = await import("@dmc--98/blindfold-client");
   const client = await blindfold({ project: "risk_demo", secret: "s", storage: "memory" });
   const risk = createRiskEngine({ storage: client.storage });
 

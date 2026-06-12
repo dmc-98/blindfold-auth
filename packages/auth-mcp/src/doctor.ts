@@ -1,4 +1,4 @@
-import { blindfold } from "@blindfold/client";
+import { blindfold } from "@dmc--98/blindfold-client";
 
 /**
  * runDoctor — a self-contained health check that proves an integration works.

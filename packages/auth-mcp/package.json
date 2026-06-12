@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/mcp",
+  "name": "@dmc--98/blindfold-mcp",
   "version": "0.1.0",
   "type": "module",
   "description": "MCP server for Blindfold Auth: lets an agent or IDE create projects, issue keys, configure roles/policies, and generate integration snippets.",
@@ -23,9 +23,9 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/client": "0.1.0",
-    "@blindfold/control": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-client": "0.1.0",
+    "@dmc--98/blindfold-control": "0.1.0"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1"

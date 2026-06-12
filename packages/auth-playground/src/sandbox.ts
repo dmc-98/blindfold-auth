@@ -1,4 +1,4 @@
-import { blindfold, generateSnippet, SNIPPET_FRAMEWORKS } from "@blindfold/client";
+import { blindfold, generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 
 /**
  * Playground sandbox — the testable core behind the interactive UI.

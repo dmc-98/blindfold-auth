@@ -8,7 +8,7 @@
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { generateSnippet, SNIPPET_FRAMEWORKS } from "@blindfold/client";
+import { generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 
 // Output to the repo root's landing/ dir. npm scripts run from the repo root,
 // so process.cwd() is stable regardless of the compiled script's own location.
@@ -107,7 +107,7 @@ const TESTIMONIALS: [string, string, string][] = [
 const FAQ: [string, string][] = [
   ["Is my user data sent to Blindfold's servers?", "No. Blindfold is local-first — it runs as a package inside your app and stores everything in your own database. There is no hosted control plane required."],
   ["Which databases are supported?", "PostgreSQL, SQLite and MySQL on the SQL side; MongoDB and other document stores on the NoSQL side. Any backend implementing the five-method storage contract works, selected with a single <code>storage:</code> option."],
-  ["What does “few lines” actually mean?", "Install <code>@blindfold/client</code>, call <code>blindfold({ project, secret, storage })</code>, and mount the middleware. RBAC/ABAC is one option on a route. The code samples on this page are generated from the real SDK."],
+  ["What does “few lines” actually mean?", "Install <code>@dmc--98/blindfold-client</code>, call <code>blindfold({ project, secret, storage })</code>, and mount the middleware. RBAC/ABAC is one option on a route. The code samples on this page are generated from the real SDK."],
   ["What is the MCP server for?", "It lets an AI agent or IDE create a project, issue keys, define roles and generate the integration snippet for you — wiring auth into a new product conversationally."],
   ["Can I try it without installing anything?", "Yes — the interactive playground lets you log in, evaluate RBAC/ABAC decisions, watch field masking, switch databases, and copy working code for your framework."]
 ];

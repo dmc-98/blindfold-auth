@@ -1,7 +1,7 @@
-import type { Storage } from "@blindfold/auth";
+import type { Storage } from "@dmc--98/blindfold-auth";
 
 /**
- * @blindfold/risk — adaptive ("dynamic") security for Blindfold Auth.
+ * @dmc--98/blindfold-risk — adaptive ("dynamic") security for Blindfold Auth.
  *
  * Turns the raw signals the runtime already records into a risk score and a
  * step-up decision, then writes the assessment to the `risk_events` table the

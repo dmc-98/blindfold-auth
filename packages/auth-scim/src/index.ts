@@ -1,5 +1,5 @@
 /**
- * @blindfold/scim — SCIM 2.0 user provisioning + compliance export.
+ * @dmc--98/blindfold-scim — SCIM 2.0 user provisioning + compliance export.
  *
  * Wraps the engine's admin/storage surface as the RFC-7643/7644 endpoints
  * enterprise IdPs (Okta, Entra, Google Workspace) provision against:
@@ -20,7 +20,7 @@
  *
  * Auth boundary: the package builds protocol handlers; the host mounts them
  * behind whatever bearer/token auth the org uses (typically a SCIM bearer
- * provisioned via `@blindfold/control`).
+ * provisioned via `@dmc--98/blindfold-control`).
  */
 
 export const SCIM_VERSION = "1.0.0-rc.1" as const;

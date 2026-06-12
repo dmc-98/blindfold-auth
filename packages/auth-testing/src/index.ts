@@ -1,8 +1,8 @@
 import assert from "node:assert";
-import { blindfold } from "@blindfold/client";
+import { blindfold } from "@dmc--98/blindfold-client";
 
 /**
- * @blindfold/testing — make local testing trivial after integrating auth.
+ * @dmc--98/blindfold-testing — make local testing trivial after integrating auth.
  *
  * Spins up a fully in-memory Blindfold instance with a deterministic secret,
  * seeds a workspace/app/users/roles in one call, mints sessions without HTTP,
@@ -168,5 +168,5 @@ export async function createTestAuth(options: Record<string, any> = {}): Promise
   return harness;
 }
 
-export { blindfold } from "@blindfold/client";
+export { blindfold } from "@dmc--98/blindfold-client";
 export { runStorageConformance } from "./storage-conformance.js";

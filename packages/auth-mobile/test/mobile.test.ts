@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer, IncomingMessage, ServerResponse } from "node:http";
-// @ts-ignore — @blindfold/auth is plain JS.
-import * as authPkg from "@blindfold/auth";
+// @ts-ignore — @dmc--98/blindfold-auth is plain JS.
+import * as authPkg from "@dmc--98/blindfold-auth";
 import { createMobileClient, generatePkcePair, createMemoryTokenStore, MOBILE_VERSION } from "../src/index.js";
 
 const createAuth = (authPkg as any).createAuth as (opts: any) => any;

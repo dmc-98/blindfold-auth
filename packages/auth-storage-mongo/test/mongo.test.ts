@@ -1,4 +1,4 @@
-import { runStorageConformance } from "@blindfold/testing/conformance";
+import { runStorageConformance } from "@dmc--98/blindfold-testing/conformance";
 import { createMongoStorage } from "../src/index.js";
 import { createInMemoryMongoDb } from "../src/in-memory-db.js";
 

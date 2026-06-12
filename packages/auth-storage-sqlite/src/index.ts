@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
-import { TABLES } from "@blindfold/auth";
-import type { Storage, StorageRecord } from "@blindfold/auth";
+import { TABLES } from "@dmc--98/blindfold-auth";
+import type { Storage, StorageRecord } from "@dmc--98/blindfold-auth";
 
 /**
  * SQLite storage adapter for Blindfold Auth.
@@ -10,7 +10,7 @@ import type { Storage, StorageRecord } from "@blindfold/auth";
  * with a primary-key `id` and a JSON `data` column — keeping the document model
  * the runtime expects while running on a real SQL engine.
  *
- *   import { createSqliteStorage } from "@blindfold/auth-storage-sqlite";
+ *   import { createSqliteStorage } from "@dmc--98/blindfold-auth-storage-sqlite";
  *   const storage = createSqliteStorage({ filePath: "./auth.db" }); // or ":memory:"
  *   const auth = createAuth({ secret, storage });
  *

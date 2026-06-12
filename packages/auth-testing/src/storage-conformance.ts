@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { createAuth, TABLES } from "@blindfold/auth";
+import { createAuth, TABLES } from "@dmc--98/blindfold-auth";
 
 /**
  * Storage adapter conformance kit (M4 — universal storage).
@@ -9,7 +9,7 @@ import { createAuth, TABLES } from "@blindfold/auth";
  * (ensureTables / list / get / put / delete) can prove it behaves identically
  * to the reference adapters by running this suite:
  *
- *   import { runStorageConformance } from "@blindfold/testing/conformance";
+ *   import { runStorageConformance } from "@dmc--98/blindfold-testing/conformance";
  *   runStorageConformance({
  *     name: "sqlite",
  *     createStorage: () => createSqliteStorage({ filePath: ":memory:" }),

@@ -1,5 +1,5 @@
-import { TABLES } from "@blindfold/auth";
-import type { Storage, StorageRecord } from "@blindfold/auth";
+import { TABLES } from "@dmc--98/blindfold-auth";
+import type { Storage, StorageRecord } from "@dmc--98/blindfold-auth";
 
 export const DEFAULT_POSTGRES_SCHEMA = "blindfold";
 

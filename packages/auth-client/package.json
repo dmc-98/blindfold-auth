@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/client",
+  "name": "@dmc--98/blindfold-client",
   "version": "0.1.0",
   "type": "module",
   "description": "Drop-in client SDK for Blindfold Auth: a few lines to add auth, RBAC/ABAC, and SSO to any app, with any SQL or NoSQL database.",
@@ -20,13 +20,13 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   },
   "peerDependencies": {
-    "@blindfold/auth-storage-postgres": "0.1.0"
+    "@dmc--98/blindfold-auth-storage-postgres": "0.1.0"
   },
   "peerDependenciesMeta": {
-    "@blindfold/auth-storage-postgres": {
+    "@dmc--98/blindfold-auth-storage-postgres": {
       "optional": true
     }
   },

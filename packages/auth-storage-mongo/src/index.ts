@@ -7,19 +7,19 @@
  * document store with no schema migrations.
  *
  *   import { MongoClient } from "mongodb";
- *   import { createMongoStorage } from "@blindfold/auth-storage-mongo";
+ *   import { createMongoStorage } from "@dmc--98/blindfold-auth-storage-mongo";
  *   const client = await new MongoClient(uri).connect();
  *   const storage = createMongoStorage({ db: client.db("blindfold") });
  *   const auth = createAuth({ secret, storage });
  *
  * For tests without a server, pair with the in-memory db fake:
- *   import { createInMemoryMongoDb } from "@blindfold/auth-storage-mongo/memory";
+ *   import { createInMemoryMongoDb } from "@dmc--98/blindfold-auth-storage-mongo/memory";
  *
  * The adapter depends only on the standard collection API
  * (findOne / find().toArray() / replaceOne / deleteOne), so it works with the
  * real `mongodb` driver and the fake alike.
  */
-import type { Storage, StorageRecord } from "@blindfold/auth";
+import type { Storage, StorageRecord } from "@dmc--98/blindfold-auth";
 
 export interface MongoLikeCollection {
   findOne(query?: Record<string, any>): Promise<Record<string, any> | null>;

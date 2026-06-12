@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createSandbox } from "./sandbox.js";
 import { PLAYGROUND_HTML } from "./ui.js";
-import { SNIPPET_FRAMEWORKS } from "@blindfold/client";
+import { SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 
 /**
  * Playground HTTP server. Serves the single-file UI and a small JSON API backed

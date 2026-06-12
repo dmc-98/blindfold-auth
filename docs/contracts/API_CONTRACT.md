@@ -4,7 +4,7 @@ This document defines the current public runtime contract for Blindfold Auth.
 
 ## Stable entry points
 
-Current stable exports from `@blindfold/auth`:
+Current stable exports from `@dmc--98/blindfold-auth`:
 
 - `createAuth`
 - `createMemoryStorage`

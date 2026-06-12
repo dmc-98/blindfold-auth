@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/auth-storage-sqlite",
+  "name": "@dmc--98/blindfold-auth-storage-sqlite",
   "version": "0.1.0",
   "type": "module",
   "description": "SQLite storage adapter for Blindfold Auth using Node's built-in node:sqlite. Great for local development, tests, and edge/single-node deployments.",
@@ -16,7 +16,7 @@
     "pretest": "npm run build"
   },
   "peerDependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   },
   "engines": {
     "node": ">=22.5.0"

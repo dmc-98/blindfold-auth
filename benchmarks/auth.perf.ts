@@ -1,5 +1,5 @@
 import { performance } from "node:perf_hooks";
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
 
 interface Budget {
   avgMs: number;

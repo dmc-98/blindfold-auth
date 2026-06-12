@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { PNG } from "pngjs";
 import gifenc from "gifenc";
-import { createAuth, createMemoryStorage } from "@blindfold/auth";
-import { startStudio } from "@blindfold/auth-studio";
+import { createAuth, createMemoryStorage } from "@dmc--98/blindfold-auth";
+import { startStudio } from "@dmc--98/blindfold-auth-studio";
 import { attachVirtualAuthenticator, createHarness, waitForText } from "../e2e/support/harness.js";
 
 const { GIFEncoder, applyPalette, quantize } = gifenc;

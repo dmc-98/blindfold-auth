@@ -250,7 +250,7 @@
       </div>
       <div class="reveal">
         <div class="tabs"><button class="tab active" data-fw="express">express</button><button class="tab" data-fw="fastify">fastify</button><button class="tab" data-fw="hono">hono</button><button class="tab" data-fw="next">next</button></div>
-        <pre class="code active" data-fw="express"><code>import { blindfold } from "@blindfold/client";
+        <pre class="code active" data-fw="express"><code>import { blindfold } from "@dmc--98/blindfold-client";
 
 const auth = await blindfold({
   project: "my-app",
@@ -259,7 +259,7 @@ const auth = await blindfold({
 });
 
 import express from "express";
-import { blindfoldExpress, guard } from "@blindfold/client/express";
+import { blindfoldExpress, guard } from "@dmc--98/blindfold-client/express";
 
 const app = express();
 app.use(express.json());
@@ -271,7 +271,7 @@ app.get("/invoices",
   (req, res) =&gt; res.json({ user: req.auth.subject.id }));
 
 app.listen(3000);</code></pre>
-<pre class="code" data-fw="fastify"><code>import { blindfold } from "@blindfold/client";
+<pre class="code" data-fw="fastify"><code>import { blindfold } from "@dmc--98/blindfold-client";
 
 const auth = await blindfold({
   project: "my-app",
@@ -295,7 +295,7 @@ app.get("/invoices", async (req, reply) =&gt; {
 });
 
 app.listen({ port: 3000 });</code></pre>
-<pre class="code" data-fw="hono"><code>import { blindfold } from "@blindfold/client";
+<pre class="code" data-fw="hono"><code>import { blindfold } from "@dmc--98/blindfold-client";
 
 const auth = await blindfold({
   project: "my-app",
@@ -319,7 +319,7 @@ app.get("/invoices", async (c) =&gt; {
 });
 
 export default app;</code></pre>
-<pre class="code" data-fw="next"><code>import { blindfold } from "@blindfold/client";
+<pre class="code" data-fw="next"><code>import { blindfold } from "@dmc--98/blindfold-client";
 
 const auth = await blindfold({
   project: "my-app",
@@ -430,7 +430,7 @@ export async function POST(request) {
     <div class="head reveal"><span class="eyebrow">FAQ</span><h2>Questions, answered</h2></div>
     <details class="reveal"><summary>Is my user data sent to Blindfold's servers?</summary><p>No. Blindfold is local-first — it runs as a package inside your app and stores everything in your own database. There is no hosted control plane required.</p></details>
 <details class="reveal"><summary>Which databases are supported?</summary><p>PostgreSQL, SQLite and MySQL on the SQL side; MongoDB and other document stores on the NoSQL side. Any backend implementing the five-method storage contract works, selected with a single <code>storage:</code> option.</p></details>
-<details class="reveal"><summary>What does “few lines” actually mean?</summary><p>Install <code>@blindfold/client</code>, call <code>blindfold({ project, secret, storage })</code>, and mount the middleware. RBAC/ABAC is one option on a route. The code samples on this page are generated from the real SDK.</p></details>
+<details class="reveal"><summary>What does “few lines” actually mean?</summary><p>Install <code>@dmc--98/blindfold-client</code>, call <code>blindfold({ project, secret, storage })</code>, and mount the middleware. RBAC/ABAC is one option on a route. The code samples on this page are generated from the real SDK.</p></details>
 <details class="reveal"><summary>What is the MCP server for?</summary><p>It lets an AI agent or IDE create a project, issue keys, define roles and generate the integration snippet for you — wiring auth into a new product conversationally.</p></details>
 <details class="reveal"><summary>Can I try it without installing anything?</summary><p>Yes — the interactive playground lets you log in, evaluate RBAC/ABAC decisions, watch field masking, switch databases, and copy working code for your framework.</p></details>
   </section>

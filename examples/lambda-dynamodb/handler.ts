@@ -1,5 +1,5 @@
-import { createAuth } from "@blindfold/auth";
-import { createApiGatewayHandler } from "@blindfold/auth-adapter-serverless";
+import { createAuth } from "@dmc--98/blindfold-auth";
+import { createApiGatewayHandler } from "@dmc--98/blindfold-auth-adapter-serverless";
 import { createDynamoReferenceStore } from "./dynamo-reference-store.js";
 
 function createInMemoryDynamoClient() {

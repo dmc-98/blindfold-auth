@@ -1,5 +1,5 @@
 /**
- * @blindfold/mobile — mobile-friendly Blindfold Auth client.
+ * @dmc--98/blindfold-mobile — mobile-friendly Blindfold Auth client.
  *
  * What it gives a mobile app (RN, Swift, Kotlin via HTTP, or any native client
  * that can speak `fetch`-style):
@@ -10,7 +10,7 @@
  *      refresh on 401 → logout, against the standard Blindfold REST contract
  *
  * The contract this client targets is the same minimal REST surface a server
- * built on `@blindfold/client` already exposes:
+ * built on `@dmc--98/blindfold-client` already exposes:
  *   POST /auth/login        → { accessToken, refreshToken }
  *   POST /auth/refresh      → { accessToken, refreshToken }
  *   POST /auth/logout       → { ok: true }

@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/auth-adapter-serverless",
+  "name": "@dmc--98/blindfold-auth-adapter-serverless",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/src/index.js",
@@ -10,7 +10,7 @@
     }
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   },
   "types": "dist/src/index.d.ts",
   "scripts": {

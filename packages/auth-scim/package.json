@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/scim",
+  "name": "@dmc--98/blindfold-scim",
   "version": "1.0.0-rc.1",
   "type": "module",
   "description": "SCIM 2.0 user provisioning + compliance export for Blindfold Auth. Wraps the engine admin API as the standard /Users, /Groups, and /ServiceProviderConfig endpoints; emits NDJSON / JSON compliance exports of principals, memberships, and audit events.",
@@ -14,6 +14,6 @@
     "test": "node --test dist/test/*.test.js"
   },
   "peerDependencies": {
-    "@blindfold/auth": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0"
   }
 }

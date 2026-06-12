@@ -1,5 +1,5 @@
 {
-  "name": "@blindfold/testing",
+  "name": "@dmc--98/blindfold-testing",
   "version": "0.1.0",
   "type": "module",
   "description": "Test helpers for Blindfold Auth: zero-dependency in-memory test mode, seed factories, session minting, and RBAC/ABAC assertions.",
@@ -20,8 +20,8 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@blindfold/auth": "0.1.0",
-    "@blindfold/client": "0.1.0"
+    "@dmc--98/blindfold-auth": "0.1.0",
+    "@dmc--98/blindfold-client": "0.1.0"
   },
   "types": "dist/src/index.d.ts"
 }

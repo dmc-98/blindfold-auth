@@ -12,15 +12,15 @@ Blindfold Auth is a package-first, local-first auth workspace. The default deplo
 
 ## Package layout
 
-- `@blindfold/auth`
+- `@dmc--98/blindfold-auth`
   The embedded runtime, admin APIs, session logic, RBAC/ABAC policy evaluation, and route protection helpers.
-- `@blindfold/auth-cli`
+- `@dmc--98/blindfold-auth-cli`
   Bootstrap, migration, demo seeding, and local Studio startup commands.
-- `@blindfold/auth-studio`
+- `@dmc--98/blindfold-auth-studio`
   The local operator UI served by the CLI or embedded runtime.
-- `@blindfold/auth-storage-postgres`
+- `@dmc--98/blindfold-auth-storage-postgres`
   The primary production storage adapter and migration contract.
-- `@blindfold/auth-adapter-serverless`
+- `@dmc--98/blindfold-auth-adapter-serverless`
   API Gateway/Lambda request normalization and handler wrapping.
 
 ## High-level architecture
@@ -93,7 +93,7 @@ The shared workspace is the top-level control plane inside the customer's own sy
 
 This is the recommended production lane.
 
-- app embeds `@blindfold/auth`
+- app embeds `@dmc--98/blindfold-auth`
 - Postgres stores workspace tables
 - Studio runs locally against the same workspace
 - migrations are applied through the CLI/config contract
@@ -102,7 +102,7 @@ This is the recommended production lane.
 
 This is the easiest learning and demo lane.
 
-- app embeds `@blindfold/auth`
+- app embeds `@dmc--98/blindfold-auth`
 - file storage persists to local JSON
 - best for onboarding and early prototyping
 

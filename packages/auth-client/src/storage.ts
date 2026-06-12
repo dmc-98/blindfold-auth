@@ -1,5 +1,5 @@
-import { createMemoryStorage, createFileStorage } from "@blindfold/auth";
-import type { Storage } from "@blindfold/auth";
+import { createMemoryStorage, createFileStorage } from "@dmc--98/blindfold-auth";
+import type { Storage } from "@dmc--98/blindfold-auth";
 
 /**
  * Adapters that ship today. Aliases reserved for M4 (universal storage) throw a
@@ -8,19 +8,19 @@ import type { Storage } from "@blindfold/auth";
  */
 // Adapters with a shipped package, lazy-loaded on demand.
 const LOADABLE_ALIASES: Record<string, { module: string; factory: string }> = {
-  postgres: { module: "@blindfold/auth-storage-postgres", factory: "createPostgresStorage" },
-  pg: { module: "@blindfold/auth-storage-postgres", factory: "createPostgresStorage" },
-  sqlite: { module: "@blindfold/auth-storage-sqlite", factory: "createSqliteStorage" },
-  mongo: { module: "@blindfold/auth-storage-mongo", factory: "createMongoStorage" },
-  mongodb: { module: "@blindfold/auth-storage-mongo", factory: "createMongoStorage" }
+  postgres: { module: "@dmc--98/blindfold-auth-storage-postgres", factory: "createPostgresStorage" },
+  pg: { module: "@dmc--98/blindfold-auth-storage-postgres", factory: "createPostgresStorage" },
+  sqlite: { module: "@dmc--98/blindfold-auth-storage-sqlite", factory: "createSqliteStorage" },
+  mongo: { module: "@dmc--98/blindfold-auth-storage-mongo", factory: "createMongoStorage" },
+  mongodb: { module: "@dmc--98/blindfold-auth-storage-mongo", factory: "createMongoStorage" }
 };
 
 // Aliases still on the roadmap (M4 continued).
 const PLANNED_ALIASES: Record<string, string> = {
-  mysql: "@blindfold/auth-storage-mysql",
-  dynamo: "@blindfold/auth-storage-dynamo",
-  dynamodb: "@blindfold/auth-storage-dynamo",
-  redis: "@blindfold/auth-storage-redis"
+  mysql: "@dmc--98/blindfold-auth-storage-mysql",
+  dynamo: "@dmc--98/blindfold-auth-storage-dynamo",
+  dynamodb: "@dmc--98/blindfold-auth-storage-dynamo",
+  redis: "@dmc--98/blindfold-auth-storage-redis"
 };
 
 function isStorageAdapter(value: any): value is Storage {
@@ -42,7 +42,7 @@ function isStorageAdapter(value: any): value is Storage {
  *  - an adapter object (passes through, validated against the 5-method contract)
  *  - "memory" (default)
  *  - "file" (requires options.filePath or a string "file:/path")
- *  - "postgres" (lazy-loads @blindfold/auth-storage-postgres)
+ *  - "postgres" (lazy-loads @dmc--98/blindfold-auth-storage-postgres)
  *
  * @returns {Promise<object>} a storage adapter
  */
