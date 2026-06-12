@@ -108,12 +108,16 @@ test("Studio browser flow bootstraps data, configures providers, and explains a 
     await page.fill('#debugForm [name="field"]', "internalNotes");
     await page.fill('#debugForm [name="resourceAttributes"]', '{}');
     await page.click('#debugForm button[type="submit"]');
-    await waitForText(page, "#debugOutput", '"effect": "mask"');
+    // The debugger now renders a decision narrative (banner + rule trace);
+    // the raw decision JSON lives in the collapsible <details> block.
+    await waitForText(page, "#debugOutput", "ALLOWED");
+    await waitForText(page, "#debugOutput", "masked: internalNotes");
 
-    const decision = await readJsonFromPre(page, "#debugOutput");
+    const decision = await readJsonFromPre(page, "#debugOutput details pre");
     assert.equal(decision.allowed, true);
     assert.equal(decision.effect, "mask");
     assert.equal(decision.obligations.maskedFields.includes("internalNotes"), true);
+    assert.ok(Array.isArray(decision.trace?.steps), "debug response carries the explain() trace");
     await waitForText(page, "#auditList", "policy.created");
   } finally {
     await context.close();
