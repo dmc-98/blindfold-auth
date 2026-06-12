@@ -55,6 +55,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify npm auth (fail fast with a clear message)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::The NPM_TOKEN repository SECRET is empty or missing. Add it under Settings → Secrets and variables → Actions → 'Secrets' tab (NOT 'Variables') with the exact name NPM_TOKEN."
+            exit 1
+          fi
+          echo "Authenticated to npm as: $(npm whoami)"
+
       - name: Build packages
         run: npm run build:packages
 
