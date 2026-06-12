@@ -10,3 +10,10 @@ test-results
 dist
 dist-tools
 *.tsbuildinfo
+
+# Local planning / scratch (PM source of truth lives in Notion)
+.claude
+.pm/
+*.local.md
+notes/
+scratch/
