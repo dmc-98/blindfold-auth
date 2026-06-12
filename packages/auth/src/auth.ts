@@ -1615,7 +1615,8 @@ export function createAuth({
   }
 
   async function debugDecision(input: any) {
-    return evaluateAuthorization(input);
+    // The Studio debugger always wants the full story: decision + trace.
+    return evaluateAuthorization({ ...input, includeTrace: true });
   }
 
   const admin = {

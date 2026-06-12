@@ -90,3 +90,46 @@ test("Studio exposes workspace snapshot and validated admin endpoints", async (t
     });
   }
 });
+
+test("Studio debugger ships the trace renderer and the API returns traces", async (t) => {
+  const auth = createAuth({
+    workspaceId: "workspace_studio_trace",
+    secret: "studio-secret-trace",
+    storage: createMemoryStorage()
+  });
+
+  let started: any;
+  try {
+    started = await startStudio({ auth, port: 0 });
+  } catch (error) {
+    if ((error as any)?.code === "EPERM" || (error as any)?.code === "EACCES") {
+      t.skip(`Studio socket binding is blocked in this environment: ${(error as any).code}`);
+      return;
+    }
+    throw error;
+  }
+
+  const { server, url } = started;
+  try {
+    // The page carries the narrative renderer.
+    const page = await (await fetch(url)).text();
+    assert.match(page, /renderDecision/);
+    assert.match(page, /Rule trace/);
+
+    // The debug endpoint returns a trace alongside the decision.
+    await auth.admin.bootstrapWorkspace({ name: "Trace WS" });
+    const app = await auth.admin.applications.create({ slug: "trace-app", name: "Trace App" });
+    const user = await auth.admin.principals.create({ email: "t@x.com", password: "pw-123456", displayName: "T" });
+    const response = await fetch(`${url}/api/debug`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ applicationId: app.id, principalId: user.id, resource: "invoice", action: "read" })
+    });
+    const decision = (await response.json()) as any;
+    assert.equal(decision.allowed, false);
+    assert.ok(decision.trace, "expected trace in debug response");
+    assert.equal(decision.trace.defaultDeny, true);
+  } finally {
+    server.close();
+  }
+});

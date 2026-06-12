@@ -689,6 +689,49 @@ function createStudioHtml(): string {
         conditionJson: safeParse(values.conditionJson)
       }));
 
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      }
+
+      // Decision narrative: banner + per-rule trace (why each rule did or
+      // didn't participate), powered by auth.explain() traces.
+      function renderDecision(result) {
+        const effect = esc(result.effect || (result.allowed ? "allow" : "deny"));
+        const color = result.allowed ? "#15803d" : "#b91c1c";
+        let html = '<div style="font-weight:700;color:' + color + '">' +
+          (result.allowed ? "ALLOWED" : "DENIED") + " — " + effect.toUpperCase() +
+          '</div><div style="margin:4px 0 8px">' + esc(result.reason) + "</div>";
+        const obligations = result.obligations || {};
+        if ((obligations.maskedFields || []).length) html += "<div>masked: " + esc(obligations.maskedFields.join(", ")) + "</div>";
+        if ((obligations.readonlyFields || []).length) html += "<div>readonly: " + esc(obligations.readonlyFields.join(", ")) + "</div>";
+        const trace = result.trace;
+        if (trace) {
+          if (trace.hardDenyReason) {
+            html += '<div style="margin-top:6px">⛔ hard deny: ' + esc(trace.hardDenyReason) + " (rules never evaluated)</div>";
+          }
+          if (trace.steps && trace.steps.length) {
+            html += '<div style="margin-top:8px;font-weight:600">Rule trace</div>';
+            for (const step of trace.steps) {
+              const deciding = trace.decidingRuleId === step.ruleId;
+              let line;
+              if (step.outcome === "applied") line = "✓ applied" + (deciding ? " — DECIDING RULE" : "");
+              else if (step.outcome === "shadowed") line = "◦ matched but outranked";
+              else if (step.outcome === "skipped-scope") line = "✗ skipped — scope mismatch: " + esc(step.scopeMisses.join(", "));
+              else line = "✗ skipped — condition evaluated false";
+              html += '<div style="margin:2px 0' + (deciding ? ";font-weight:700" : "") + '">' +
+                esc(step.ruleId) + ' <span style="opacity:.75">[' + esc(step.source) + " · " + esc(step.effect) +
+                " · priority " + esc(step.priority) + "]</span> " + line + "</div>";
+            }
+          } else if (!trace.hardDenyReason) {
+            html += '<div style="margin-top:6px">No rules in scope.</div>';
+          }
+          if (trace.defaultDeny) html += '<div style="margin-top:6px">⚠ default deny — no rule allowed this request.</div>';
+        }
+        html += '<details style="margin-top:8px"><summary>raw decision JSON</summary><pre>' +
+          esc(JSON.stringify(result, null, 2)) + "</pre></details>";
+        return html;
+      }
+
       document.getElementById("debugForm").addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
@@ -699,7 +742,7 @@ function createStudioHtml(): string {
           resourceAttributes: safeParse(values.resourceAttributes)
         };
         const result = await request("/api/debug", "POST", payload);
-        debugOutput.textContent = JSON.stringify(result, null, 2);
+        debugOutput.innerHTML = renderDecision(result);
         setStatus("Decision evaluated.");
       });
 
