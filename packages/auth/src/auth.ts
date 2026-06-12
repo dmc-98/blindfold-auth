@@ -8,7 +8,7 @@ import {
   finishPasskeyRegistration as verifyPasskeyRegistrationResult,
   registrationInfoToCredentialRecord
 } from "./passkeys.js";
-import { evaluatePolicies } from "./policy.js";
+import { evaluatePolicies, explainPolicies } from "./policy.js";
 import { createSamlClient, samlProfileToClaims } from "./saml.js";
 import { createFileStorage, createMemoryStorage } from "./storage.js";
 import { generateRecoveryCodes, generateTotpSecret, getTotpCode, verifyTotpCode } from "./totp.js";
@@ -1524,8 +1524,9 @@ export function createAuth({
     resourceAttributes = {},
     request = {},
     principal: preloadedPrincipal = null,
-    application: preloadedApplication = null
-  }: { principalId: any; applicationId: any; action: any; resource: any; field?: any; tenantId?: any; resourceAttributes?: any; request?: any; principal?: any; application?: any }) {
+    application: preloadedApplication = null,
+    includeTrace = false
+  }: { principalId: any; applicationId: any; action: any; resource: any; field?: any; tenantId?: any; resourceAttributes?: any; request?: any; principal?: any; application?: any; includeTrace?: boolean }) {
     const application = preloadedApplication || (await getApplication(applicationId));
     const principal = preloadedPrincipal || (await storage.get("principals", principalId));
     const hardDenyReasons = [];
@@ -1568,7 +1569,7 @@ export function createAuth({
       }
     };
 
-    const decision = evaluatePolicies({
+    const explanation = explainPolicies({
       rolePermissions,
       directGrants,
       policies,
@@ -1586,10 +1587,21 @@ export function createAuth({
     });
 
     return {
-      ...decision,
+      ...explanation.decision,
       principal,
       application,
-      roleIds
+      roleIds,
+      ...(includeTrace
+        ? {
+            trace: {
+              steps: explanation.steps,
+              decidingRuleId: explanation.decidingRuleId,
+              defaultDeny: explanation.defaultDeny,
+              hardDenyReason: explanation.hardDenyReason,
+              context
+            }
+          }
+        : {})
     };
   }
 
@@ -2353,6 +2365,35 @@ export function createAuth({
         tenantId: args.tenantId,
         resourceAttributes: args.resourceAttributes || {},
         request: args.request || {}
+      });
+    },
+    /**
+     * Like can(), but also returns a `trace`: every rule's outcome
+     * (applied / shadowed / skipped-scope with the failing components /
+     * skipped-condition), the deciding rule id, default-deny flag, and the
+     * evaluation context. Powers the Studio policy debugger.
+     */
+    async explain(inputOrPrincipalId: any, action?: any, resource?: any, context: any = {}) {
+      const args =
+        typeof inputOrPrincipalId === "object"
+          ? inputOrPrincipalId
+          : {
+              principalId: inputOrPrincipalId,
+              action,
+              resource,
+              ...context
+            };
+
+      return evaluateAuthorization({
+        principalId: args.principalId,
+        applicationId: args.applicationId,
+        action: args.action,
+        resource: args.resource,
+        field: args.field,
+        tenantId: args.tenantId,
+        resourceAttributes: args.resourceAttributes || {},
+        request: args.request || {},
+        includeTrace: true
       });
     },
     protect(optionsOrHandler: any, maybeHandler?: any) {
