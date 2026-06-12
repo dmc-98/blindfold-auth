@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'
+  # Manual re-run lane: re-publish after a partial failure (idempotent — already-
+  # published versions are skipped) without re-tagging.
+  workflow_dispatch:
 
 jobs:
   release:
@@ -27,6 +30,37 @@ jobs:
         run: npm test
 
       - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+
+  publish-npm:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance attestation (OIDC)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build:packages
+
+      - name: Publish workspace packages to npm
+        run: node scripts/publish-packages.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # If the GitHub repo is private, provenance is unavailable — flip to 'false'.
+          NPM_PUBLISH_PROVENANCE: 'true'
