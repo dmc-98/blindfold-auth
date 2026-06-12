@@ -133,3 +133,56 @@ test("Studio debugger ships the trace renderer and the API returns traces", asyn
     server.close();
   }
 });
+
+test("Studio dry-run endpoint evaluates proposed rules without persisting", async (t) => {
+  const auth = createAuth({
+    workspaceId: "workspace_studio_dryrun",
+    secret: "studio-secret-dryrun",
+    storage: createMemoryStorage()
+  });
+
+  let started: any;
+  try {
+    started = await startStudio({ auth, port: 0 });
+  } catch (error) {
+    if ((error as any)?.code === "EPERM" || (error as any)?.code === "EACCES") {
+      t.skip(`Studio socket binding is blocked in this environment: ${(error as any).code}`);
+      return;
+    }
+    throw error;
+  }
+
+  const { server, url } = started;
+  try {
+    await auth.admin.bootstrapWorkspace({ name: "DryRun WS" });
+    const app = await auth.admin.applications.create({ slug: "dr-app", name: "DR App" });
+    const user = await auth.admin.principals.create({ email: "dr@x.com", password: "pw-123456", displayName: "DR" });
+    const role = await auth.admin.roles.create({ applicationId: app.id, name: "op" });
+    await auth.admin.roles.grantPermission({ applicationId: app.id, roleId: role.id, resource: "invoice", action: "read" });
+    await auth.admin.memberships.assignRole({ principalId: user.id, applicationId: app.id, roleId: role.id });
+
+    const response = await fetch(`${url}/api/policies/dry-run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        applicationId: app.id,
+        addPolicies: [{ id: "proposed", principalId: user.id, resource: "invoice", action: "read", effect: "deny", priority: 99 }],
+        cases: [{ principalId: user.id, resource: "invoice", action: "read" }]
+      })
+    });
+    const report = (await response.json()) as any;
+    assert.equal(report.cases[0].before.allowed, true);
+    assert.equal(report.cases[0].after.allowed, false);
+    assert.equal(report.cases[0].changed, true);
+
+    // Nothing persisted — live decision still allows.
+    const live = await auth.can({ principalId: user.id, applicationId: app.id, resource: "invoice", action: "read" });
+    assert.equal(live.allowed, true);
+
+    // The page ships the dry-run form.
+    const page = await (await fetch(url)).text();
+    assert.match(page, /dryRunForm/);
+  } finally {
+    server.close();
+  }
+});

@@ -409,6 +409,15 @@ function createStudioHtml(): string {
               <textarea name="resourceAttributes" placeholder='{"tenantId":"tenant_acme","ownerId":"principal_123"}'></textarea>
               <button type="submit">Evaluate decision</button>
             </form>
+            <form id="dryRunForm" style="margin-top:14px">
+              <strong>Dry run — what would this rule change?</strong>
+              <input name="applicationId" placeholder="application id" required />
+              <input name="principalId" placeholder="principal id" required />
+              <input name="resource" placeholder="invoice" required />
+              <input name="action" placeholder="read" required />
+              <textarea name="proposedRule" placeholder='{"id":"proposed_1","effect":"deny","resource":"invoice","action":"read","priority":99}' required></textarea>
+              <button type="submit">Dry-run proposed rule</button>
+            </form>
             <div class="list-item" style="margin-top:12px">
               <strong>Latest decision</strong>
               <pre id="debugOutput">No decision yet.</pre>
@@ -746,6 +755,27 @@ function createStudioHtml(): string {
         setStatus("Decision evaluated.");
       });
 
+      document.getElementById("dryRunForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const values = Object.fromEntries(formData.entries());
+        const rule = safeParse(values.proposedRule);
+        if (!rule) { setStatus("Proposed rule must be valid JSON."); return; }
+        const result = await request("/api/policies/dry-run", "POST", {
+          applicationId: values.applicationId,
+          addPolicies: [rule],
+          cases: [{ principalId: values.principalId, resource: values.resource, action: values.action }]
+        });
+        const c = result.cases && result.cases[0];
+        if (!c) { setStatus("Dry run returned no cases."); return; }
+        debugOutput.innerHTML =
+          '<div style="font-weight:700">Dry run — ' + (c.changed ? "DECISION CHANGES" : "no change") + "</div>" +
+          '<div style="margin-top:6px"><strong>before:</strong> ' + esc(c.before.effect) + " — " + esc(c.before.reason) + "</div>" +
+          '<div><strong>after:</strong> ' + esc(c.after.effect) + " — " + esc(c.after.reason) + "</div>" +
+          '<details style="margin-top:8px"><summary>raw dry-run JSON</summary><pre>' + esc(JSON.stringify(result, null, 2)) + "</pre></details>";
+        setStatus("Dry run evaluated (nothing persisted).");
+      });
+
       document.addEventListener("click", async (event) => {
         const credentialId = event.target?.dataset?.passkeyRevoke;
         if (!credentialId) {
@@ -898,6 +928,22 @@ export function startStudio({ auth, port = 4110, host = "127.0.0.1" }: { auth: a
               applicationId: payload.applicationId,
               roleId: payload.roleId,
               tenantId: payload.tenantId
+            })
+          )
+        );
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/policies/dry-run") {
+        const payload = await readJson(request);
+        return send(
+          response,
+          json(
+            200,
+            await auth.admin.policies.dryRun({
+              applicationId: payload.applicationId,
+              addPolicies: payload.addPolicies || [],
+              removePolicyIds: payload.removePolicyIds || [],
+              cases: payload.cases || []
             })
           )
         );
