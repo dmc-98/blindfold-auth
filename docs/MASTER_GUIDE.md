@@ -303,6 +303,41 @@ The repo now includes:
 
 Before the first public launch, replace placeholder repository URLs in `.github/ISSUE_TEMPLATE/config.yml` and placeholder funding values in `.github/FUNDING.yml`.
 
+## Explainable authorization toolkit
+
+Three surfaces answer "why was this request allowed or denied?" — they share
+one evaluator, so a trace can never disagree with the decision the app
+enforced:
+
+1. **`auth.explain(query)`** — same signature as `auth.can()`, returns the
+   decision plus a `trace`: every rule's outcome (`applied`, `shadowed`,
+   `skipped-scope` with the exact failing components named, or
+   `skipped-condition`), the deciding rule id, default-deny flag, and the
+   evaluation context.
+2. **`runPolicySuite(t, cases)`** (from `@dmc--98/blindfold-testing`) — pin
+   the authorization model in CI with a declarative table of
+   allow/deny/partial-decision expectations; failures self-explain with the
+   actual effect, reason, and obligations.
+3. **`admin.policies.dryRun({ applicationId, addPolicies, removePolicyIds, cases })`**
+   — what-if evaluation of proposed rule changes against live data with
+   before/after decisions per case; nothing persists.
+
+The Studio **Policy Debugger** card renders `explain()` traces as a
+narrative: ALLOW/DENY banner, per-rule trace lines, and the deciding rule
+highlighted.
+
+## Deployment health: blindfold doctor
+
+`blindfold doctor` runs two halves and fails (exit 1) on any critical issue:
+
+1. the nine-step runtime smoke (bootstrap → login → allow/deny → refresh →
+   audit), and
+2. a **security configuration scan**: secret quality (missing, placeholder,
+   short, low-entropy), database TLS and default credentials, production
+   without a database lane, Studio bound beyond localhost, default workspace
+   id in production. Every finding includes a concrete fix. Use
+   `--security-only` in CI to lint a deployment env without the smoke.
+
 ## Smoke test checklist
 
 Every deploy path should pass the same basic smoke checks:
