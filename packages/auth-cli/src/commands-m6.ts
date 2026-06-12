@@ -2,6 +2,8 @@ import { createControlPlane, createFileStore } from "@dmc--98/blindfold-control"
 import { generateSnippet, SNIPPET_FRAMEWORKS } from "@dmc--98/blindfold-client";
 import { runDoctor } from "@dmc--98/blindfold-mcp/doctor";
 import { scanSecurityConfig, hasCriticalFinding } from "./security-scan.js";
+import { analyzeSsoMetadata, fetchSsoMetadata } from "./sso-doctor.js";
+import { readFileSync } from "node:fs";
 
 interface Io {
   log: (...args: any[]) => void;
@@ -184,10 +186,47 @@ export async function doctorCommand(
   return ok ? 0 : 1;
 }
 
+/**
+ * `blindfold sso doctor --url <https-metadata-url> | --file <path>`
+ * Static IdP metadata checks: cert expiry, https endpoints, PKCE, alg:none,
+ * SSO bindings. URL fetches go through the SSRF guard.
+ */
+export async function ssoCommand(argv: string[], io: Io = console): Promise<number> {
+  if (argv[1] !== "doctor") {
+    io.log("Usage: blindfold sso doctor --url <metadata-url> | --file <metadata-file>");
+    return 1;
+  }
+  const url = readFlag(argv, "--url");
+  const file = readFlag(argv, "--file");
+  if (!url && !file) {
+    io.log("sso doctor needs --url or --file pointing at IdP metadata (OIDC discovery JSON or SAML metadata XML).");
+    return 1;
+  }
+  let content: string;
+  try {
+    content = url ? await fetchSsoMetadata(url) : readFileSync(file!, "utf8");
+  } catch (error) {
+    io.log(`✗ could not load metadata: ${(error as Error).message}`);
+    return 1;
+  }
+  const findings = analyzeSsoMetadata({ content });
+  if (findings.length === 0) {
+    io.log("✓ Metadata looks healthy: signing material present, endpoints on TLS, no weak algorithms detected.");
+    return 0;
+  }
+  for (const f of findings) {
+    const icon = f.severity === "critical" ? "✗" : f.severity === "warning" ? "!" : "·";
+    io.log(`${icon} [${f.severity}] ${f.code}: ${f.message}`);
+    io.log(`    fix: ${f.fix}`);
+  }
+  return findings.some((f) => f.severity === "critical") ? 1 : 0;
+}
+
 export const M6_COMMANDS: Record<string, (argv: string[], io?: Io) => Promise<any>> = {
   "add-auth": addAuthCommand,
   keys: keysCommand,
   project: projectCommand,
   doctor: doctorCommand,
+  sso: ssoCommand,
   playground: playgroundCommand
 };
