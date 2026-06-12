@@ -17,5 +17,14 @@
     "build": "tsc -p .",
     "pretest": "npm run build",
     "test": "node --test dist/test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmc-98/blindfold-auth.git",
+    "directory": "packages/auth-storage-postgres"
+  },
+  "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
+  "bugs": {
+    "url": "https://github.com/dmc-98/blindfold-auth/issues"
   }
 }

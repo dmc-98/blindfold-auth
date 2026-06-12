@@ -18,5 +18,14 @@
   },
   "peerDependencies": {
     "@dmc--98/blindfold-auth": "0.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmc-98/blindfold-auth.git",
+    "directory": "packages/auth-sso"
+  },
+  "homepage": "https://github.com/dmc-98/blindfold-auth#readme",
+  "bugs": {
+    "url": "https://github.com/dmc-98/blindfold-auth/issues"
   }
 }
