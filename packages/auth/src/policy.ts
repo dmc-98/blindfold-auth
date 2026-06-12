@@ -110,24 +110,25 @@ interface PolicyQuery {
   field?: string;
 }
 
+/**
+ * Names every scope component a rule fails on — the heart of explain():
+ * "this rule was skipped because its `resource` doesn't match" is the
+ * answer operators actually need when debugging a deny.
+ */
+function scopeMisses(rule: any, query: PolicyQuery): string[] {
+  const misses: string[] = [];
+  if (rule.applicationId && rule.applicationId !== query.applicationId) misses.push("applicationId");
+  if (rule.tenantId && rule.tenantId !== query.tenantId) misses.push("tenantId");
+  if (rule.principalId && rule.principalId !== query.principalId) misses.push("principalId");
+  if (rule.roleId && !query.roleIds.includes(rule.roleId)) misses.push("roleId");
+  if (!matchesResource(rule.resource, query.resource)) misses.push("resource");
+  if (!matchesAction(rule.action, query.action)) misses.push("action");
+  if (!matchesField(rule.field, query.field)) misses.push("field");
+  return misses;
+}
+
 function matchesScope(rule: any, query: PolicyQuery): boolean {
-  if (rule.applicationId && rule.applicationId !== query.applicationId) {
-    return false;
-  }
-
-  if (rule.tenantId && rule.tenantId !== query.tenantId) {
-    return false;
-  }
-
-  if (rule.principalId && rule.principalId !== query.principalId) {
-    return false;
-  }
-
-  if (rule.roleId && !query.roleIds.includes(rule.roleId)) {
-    return false;
-  }
-
-  return matchesResource(rule.resource, query.resource) && matchesAction(rule.action, query.action) && matchesField(rule.field, query.field);
+  return scopeMisses(rule, query).length === 0;
 }
 
 export interface EvaluatePoliciesInput {
@@ -139,89 +140,149 @@ export interface EvaluatePoliciesInput {
   hardDenyReasons?: string[];
 }
 
-export function evaluatePolicies({
+/** One rule's journey through an evaluation — the unit of a policy trace. */
+export interface PolicyTraceStep {
+  ruleId: string;
+  source: "rolePermission" | "directGrant" | "policy";
+  effect: string;
+  priority: number;
+  /** Scope components that failed to match ([] when scope matched). */
+  scopeMisses: string[];
+  /** null when the condition was never evaluated (scope already missed). */
+  conditionMatched: boolean | null;
+  /**
+   * applied — contributed to the decision (deciding rule or field obligation)
+   * shadowed — matched fully but outranked by the deciding rule
+   * skipped-scope / skipped-condition — never eligible
+   */
+  outcome: "applied" | "shadowed" | "skipped-scope" | "skipped-condition";
+}
+
+export interface PolicyExplanation {
+  decision: PolicyDecision;
+  steps: PolicyTraceStep[];
+  /** Rule that decided allow/deny (null on default deny and hard deny). */
+  decidingRuleId: string | null;
+  defaultDeny: boolean;
+  hardDenyReason: string | null;
+}
+
+/**
+ * explainPolicies — the primary evaluator. Walks every rule and records why
+ * it did or didn't participate, then derives the decision from the applied
+ * set. evaluatePolicies() delegates here, so a trace can never disagree with
+ * the decision an application actually enforced.
+ */
+export function explainPolicies({
   rolePermissions,
   directGrants,
   policies,
   context,
   query,
   hardDenyReasons = []
-}: EvaluatePoliciesInput): PolicyDecision {
+}: EvaluatePoliciesInput): PolicyExplanation {
+  const empty = { maskedFields: [] as string[], readonlyFields: [] as string[] };
+
+  if (hardDenyReasons.length > 0) {
+    return {
+      decision: { allowed: false, effect: "deny", matchedRuleIds: [], obligations: empty, reason: hardDenyReasons[0]! },
+      steps: [],
+      decidingRuleId: null,
+      defaultDeny: false,
+      hardDenyReason: hardDenyReasons[0]!
+    };
+  }
+
+  const tagged = [
+    ...rolePermissions.map((permission) => ({
+      rule: {
+        ...permission,
+        id: permission.id || `permission:${permission.roleId}:${permission.resource}:${permission.action}`,
+        effect: permission.effect || "allow",
+        priority: permission.priority ?? 10
+      },
+      source: "rolePermission" as const
+    })),
+    ...directGrants.map((rule) => ({ rule, source: "directGrant" as const })),
+    ...policies.map((rule) => ({ rule, source: "policy" as const }))
+  ];
+
+  const steps: PolicyTraceStep[] = tagged
+    .map(({ rule, source }) => {
+      const misses = scopeMisses(rule, query);
+      const conditionMatched = misses.length > 0 ? null : evaluateCondition(rule.conditionJson, context);
+      const outcome: PolicyTraceStep["outcome"] =
+        misses.length > 0 ? "skipped-scope" : conditionMatched ? "shadowed" : "skipped-condition";
+      return { ruleId: rule.id, source, effect: rule.effect, priority: rule.priority ?? 0, scopeMisses: misses, conditionMatched, outcome, _rule: rule } as PolicyTraceStep & { _rule: any };
+    })
+    .sort((left, right) => right.priority - left.priority);
+
+  const eligible = steps.filter((s) => s.outcome === "shadowed");
   const matchedRuleIds: string[] = [];
   const maskedFields = new Set<string>();
   const readonlyFields = new Set<string>();
 
-  if (hardDenyReasons.length > 0) {
-    return {
-      allowed: false,
-      effect: "deny",
-      matchedRuleIds,
-      obligations: { maskedFields: [], readonlyFields: [] },
-      reason: hardDenyReasons[0]!
-    };
-  }
+  const finish = (decision: PolicyDecision, decidingRuleId: string | null, defaultDeny = false): PolicyExplanation => {
+    for (const s of steps) delete (s as { _rule?: unknown })._rule;
+    return { decision, steps, decidingRuleId, defaultDeny, hardDenyReason: null };
+  };
 
-  const allRules = [
-    ...rolePermissions.map((permission) => ({
-      ...permission,
-      id: permission.id || `permission:${permission.roleId}:${permission.resource}:${permission.action}`,
-      effect: permission.effect || "allow",
-      priority: permission.priority ?? 10
-    })),
-    ...directGrants,
-    ...policies
-  ]
-    .filter((rule) => matchesScope(rule, query))
-    .filter((rule) => evaluateCondition(rule.conditionJson, context))
-    .sort((left, right) => (right.priority ?? 0) - (left.priority ?? 0));
-
-  const explicitDeny = allRules.find((rule) => rule.effect === "deny");
+  const explicitDeny = eligible.find((s) => s.effect === "deny");
   if (explicitDeny) {
-    matchedRuleIds.push(explicitDeny.id);
-    return {
-      allowed: false,
-      effect: "deny",
-      matchedRuleIds,
-      obligations: { maskedFields: [], readonlyFields: [] },
-      reason: explicitDeny.reason || "explicit deny"
-    };
+    explicitDeny.outcome = "applied";
+    matchedRuleIds.push(explicitDeny.ruleId);
+    const reason = (explicitDeny as { _rule?: { reason?: string } })._rule?.reason || "explicit deny";
+    return finish(
+      { allowed: false, effect: "deny", matchedRuleIds, obligations: empty, reason },
+      explicitDeny.ruleId
+    );
   }
 
-  const maskRules = allRules.filter((rule) => rule.effect === "mask" && rule.field);
-  for (const rule of maskRules) {
-    matchedRuleIds.push(rule.id);
-    maskedFields.add(rule.field);
+  // Two passes (masks, then readonlys) to keep matchedRuleIds ordering
+  // byte-identical with the original evaluatePolicies implementation.
+  for (const s of eligible) {
+    const field = (s as { _rule?: { field?: string } })._rule?.field;
+    if (s.effect === "mask" && field) {
+      s.outcome = "applied";
+      matchedRuleIds.push(s.ruleId);
+      maskedFields.add(field);
+    }
+  }
+  for (const s of eligible) {
+    const field = (s as { _rule?: { field?: string } })._rule?.field;
+    if (s.effect === "readonly" && field) {
+      s.outcome = "applied";
+      matchedRuleIds.push(s.ruleId);
+      readonlyFields.add(field);
+    }
   }
 
-  const readonlyRules = allRules.filter((rule) => rule.effect === "readonly" && rule.field);
-  for (const rule of readonlyRules) {
-    matchedRuleIds.push(rule.id);
-    readonlyFields.add(rule.field);
-  }
-
-  const explicitAllow = allRules.find((rule) => rule.effect === "allow");
+  const explicitAllow = eligible.find((s) => s.effect === "allow");
   if (!explicitAllow && maskedFields.size === 0 && readonlyFields.size === 0) {
-    return {
-      allowed: false,
-      effect: "deny",
-      matchedRuleIds,
-      obligations: { maskedFields: [], readonlyFields: [] },
-      reason: "default deny"
-    };
+    return finish(
+      { allowed: false, effect: "deny", matchedRuleIds, obligations: empty, reason: "default deny" },
+      null,
+      true
+    );
   }
 
   if (explicitAllow) {
-    matchedRuleIds.push(explicitAllow.id);
+    explicitAllow.outcome = "applied";
+    matchedRuleIds.push(explicitAllow.ruleId);
   }
 
-  return {
-    allowed: true,
-    effect: maskedFields.size > 0 ? "mask" : readonlyFields.size > 0 ? "readonly" : "allow",
-    matchedRuleIds,
-    obligations: {
-      maskedFields: [...maskedFields],
-      readonlyFields: [...readonlyFields]
+  return finish(
+    {
+      allowed: true,
+      effect: maskedFields.size > 0 ? "mask" : readonlyFields.size > 0 ? "readonly" : "allow",
+      matchedRuleIds,
+      obligations: { maskedFields: [...maskedFields], readonlyFields: [...readonlyFields] },
+      reason: explicitAllow ? "explicit allow" : "field obligation"
     },
-    reason: explicitAllow ? "explicit allow" : "field obligation"
-  };
+    explicitAllow ? explicitAllow.ruleId : null
+  );
+}
+
+export function evaluatePolicies(input: EvaluatePoliciesInput): PolicyDecision {
+  return explainPolicies(input).decision;
 }
