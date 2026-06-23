@@ -153,6 +153,38 @@ test("Compliance export (NDJSON) emits newline-delimited records", async () => {
   }
 });
 
+test("Schemas: GET /Schemas returns ListResponse with User and Group schema definitions", async () => {
+  const { scim } = await fixture();
+  const res: any = await scim.handle({ method: "GET", path: "/Schemas" });
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.schemas, [SCIM_SCHEMAS.listResponse]);
+  assert.ok(res.body.totalResults >= 2, "at least User + Group schemas");
+  const ids: string[] = res.body.Resources.map((s: any) => s.id);
+  assert.ok(ids.includes(SCIM_SCHEMAS.user), "User schema present");
+  assert.ok(ids.includes(SCIM_SCHEMAS.group), "Group schema present");
+  const userSchema = res.body.Resources.find((s: any) => s.id === SCIM_SCHEMAS.user);
+  assert.ok(userSchema, "User schema found");
+  assert.ok(Array.isArray(userSchema.attributes), "User schema has attributes array");
+  assert.ok(userSchema.attributes.some((a: any) => a.name === "userName"), "userName attribute present");
+});
+
+test("Groups: GET /Groups/{id} returns a single group by role id", async () => {
+  const { scim, role } = await fixture();
+  const res: any = await scim.handle({ method: "GET", path: `/Groups/${role.id}` });
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.schemas, [SCIM_SCHEMAS.group]);
+  assert.equal(res.body.id, role.id);
+  assert.ok(typeof res.body.displayName === "string", "displayName is a string");
+  assert.ok(Array.isArray(res.body.members), "members is an array");
+});
+
+test("Groups: GET /Groups/{id} returns 404 for unknown group", async () => {
+  const { scim } = await fixture();
+  const res: any = await scim.handle({ method: "GET", path: "/Groups/role_does_not_exist" });
+  assert.equal(res.status, 404);
+  assert.deepEqual(res.body.schemas, [SCIM_SCHEMAS.error]);
+});
+
 test("Unknown endpoint returns 404 with SCIM error envelope", async () => {
   const { scim } = await fixture();
   const res: any = await scim.handle({ method: "GET", path: "/Things" });

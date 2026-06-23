@@ -321,6 +321,25 @@ export function createScimServer({ auth, defaultPassword }: ScimServerOptions): 
     };
   }
 
+  // --- Groups/{id} handler ----------------------------------------------------
+  async function getGroup(id: string): Promise<ScimResponse> {
+    const role = (await auth.storage.get("roles", id)) as ScimEngineRole | null;
+    if (!role) return err(404, "Group not found");
+    const memberships = (await auth.storage.list("memberships", {})) as ScimEngineMembership[];
+    const principals = await auth.admin.principals.list();
+    const principalsById = new Map(principals.map((p) => [p.id, p]));
+    const group: ScimGroup = {
+      schemas: [SCIM_SCHEMAS.group],
+      id: role.id,
+      displayName: `${role.name} (${role.applicationId})`,
+      members: memberships
+        .filter((m) => m.roleId === role.id)
+        .map((m) => ({ value: m.principalId, display: principalsById.get(m.principalId)?.email })),
+      meta: { resourceType: "Group" }
+    };
+    return { status: 200, body: group };
+  }
+
   // --- Discovery --------------------------------------------------------------
   function serviceProviderConfig(): ScimResponse {
     return {
@@ -337,6 +356,61 @@ export function createScimServer({ auth, defaultPassword }: ScimServerOptions): 
         authenticationSchemes: [
           { name: "OAuth Bearer Token", description: "Authentication via OAuth 2.0 bearer token", type: "oauthbearertoken", primary: true }
         ]
+      }
+    };
+  }
+
+  function schemas(): ScimResponse {
+    // RFC 7643 §7 — minimal attribute descriptors for User and Group.
+    const SCHEMA_URN = "urn:ietf:params:scim:schemas:core:2.0:Schema";
+    const userSchema = {
+      schemas: [SCHEMA_URN],
+      id: SCIM_SCHEMAS.user,
+      name: "User",
+      description: "Core user account",
+      attributes: [
+        { name: "userName", type: "string", multiValued: false, required: true, caseExact: false, mutability: "readWrite", returned: "default", uniqueness: "server" },
+        { name: "displayName", type: "string", multiValued: false, required: false, caseExact: false, mutability: "readWrite", returned: "default", uniqueness: "none" },
+        { name: "name", type: "complex", multiValued: false, required: false, mutability: "readWrite", returned: "default", uniqueness: "none",
+          subAttributes: [
+            { name: "formatted", type: "string", multiValued: false, required: false, caseExact: false, mutability: "readWrite", returned: "default", uniqueness: "none" }
+          ]
+        },
+        { name: "emails", type: "complex", multiValued: true, required: false, mutability: "readWrite", returned: "default", uniqueness: "none",
+          subAttributes: [
+            { name: "value", type: "string", multiValued: false, required: false, caseExact: false, mutability: "readWrite", returned: "default", uniqueness: "none" },
+            { name: "primary", type: "boolean", multiValued: false, required: false, mutability: "readWrite", returned: "default", uniqueness: "none" }
+          ]
+        },
+        { name: "active", type: "boolean", multiValued: false, required: false, mutability: "readWrite", returned: "default", uniqueness: "none" },
+        { name: "externalId", type: "string", multiValued: false, required: false, caseExact: true, mutability: "readWrite", returned: "default", uniqueness: "none" }
+      ],
+      meta: { resourceType: "Schema", location: "/Schemas/" + SCIM_SCHEMAS.user }
+    };
+    const groupSchema = {
+      schemas: [SCHEMA_URN],
+      id: SCIM_SCHEMAS.group,
+      name: "Group",
+      description: "Group resource (mapped from roles)",
+      attributes: [
+        { name: "displayName", type: "string", multiValued: false, required: true, caseExact: false, mutability: "readWrite", returned: "default", uniqueness: "none" },
+        { name: "members", type: "complex", multiValued: true, required: false, mutability: "readWrite", returned: "default", uniqueness: "none",
+          subAttributes: [
+            { name: "value", type: "string", multiValued: false, required: false, caseExact: false, mutability: "immutable", returned: "default", uniqueness: "none" },
+            { name: "display", type: "string", multiValued: false, required: false, caseExact: false, mutability: "readOnly", returned: "default", uniqueness: "none" }
+          ]
+        }
+      ],
+      meta: { resourceType: "Schema", location: "/Schemas/" + SCIM_SCHEMAS.group }
+    };
+    return {
+      status: 200,
+      body: {
+        schemas: [SCIM_SCHEMAS.listResponse],
+        totalResults: 2,
+        startIndex: 1,
+        itemsPerPage: 2,
+        Resources: [userSchema, groupSchema]
       }
     };
   }
@@ -381,6 +455,7 @@ export function createScimServer({ auth, defaultPassword }: ScimServerOptions): 
     try {
       if (path === "/ServiceProviderConfig" && method === "GET") return serviceProviderConfig();
       if (path === "/ResourceTypes" && method === "GET") return resourceTypes();
+      if (path === "/Schemas" && method === "GET") return schemas();
       if (path === "/Users" && method === "GET") return listUsers(input.query);
       if (path === "/Users" && method === "POST") return createUser(input.body);
       if (path === "/Groups" && method === "GET") return listGroups();
@@ -391,6 +466,11 @@ export function createScimServer({ auth, defaultPassword }: ScimServerOptions): 
         if (method === "PATCH") return patchUser(id, input.body);
         if (method === "PUT") return putUser(id, input.body);
         if (method === "DELETE") return deleteUser(id);
+      }
+      const groupMatch = path.match(/^\/Groups\/([^/]+)$/);
+      if (groupMatch) {
+        const id = groupMatch[1]!;
+        if (method === "GET") return getGroup(id);
       }
       return err(404, `Unknown SCIM endpoint: ${method} ${path}`);
     } catch (e) {
