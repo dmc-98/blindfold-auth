@@ -2006,6 +2006,36 @@ export function createAuth({
       /** Re-enable a previously disabled principal (does not restore old sessions). */
       async enable({ principalId, actorId = "system" }: { principalId: any; actorId?: any }) {
         return admin.principals.setStatus({ principalId, status: "active", actorId });
+      },
+      /**
+       * Set (or reset) a principal's password.
+       * Applies the breach-check gate when `security.breachPasswordCheck` is
+       * enabled — same policy as `principals.create`.
+       */
+      async setPassword({ principalId, newPassword, actorId = "system" }: { principalId: any; newPassword: any; actorId?: any }) {
+        if (!newPassword) {
+          throw new Error("newPassword is required");
+        }
+        const principal = await storage.get("principals", principalId);
+        if (!principal) {
+          throw new Error("Principal not found");
+        }
+        if (securityConfig.breachPasswordCheck) {
+          const breachOptions = securityConfig.breachPasswordCheck === true ? {} : securityConfig.breachPasswordCheck;
+          const breach = await checkPasswordBreached(newPassword, breachOptions);
+          if (breach.breached) {
+            throw new Error(`Password rejected: it appears in ${breach.count} known data breaches. Choose a different password.`);
+          }
+        }
+        const next = withTimestamps({ ...principal, passwordHash: hashPassword(newPassword) }, principal);
+        await storage.put("principals", next);
+        await writeAuditEvent({
+          type: "principal.password_changed",
+          actorId,
+          principalId,
+          data: {}
+        });
+        return next;
       }
     },
     passkeys: {

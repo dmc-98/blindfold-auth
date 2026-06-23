@@ -65,3 +65,55 @@ test("breach check is off by default — breached passwords register (back-compa
   const created = await auth.admin.principals.create({ email: "legacy@x.com", password: "pw-123456", displayName: "L" });
   assert.ok(created.id);
 });
+
+// ── setPassword wiring ────────────────────────────────────────────────────────
+
+test("setPassword rejects a breached password when breachPasswordCheck is enabled", async () => {
+  const { fetchImpl } = fakeHibp("bad-pass-9!", 500);
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { breachPasswordCheck: { fetchImpl } },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "SPW Breach WS" });
+  const p = await auth.admin.principals.create({ email: "user@spw.com", password: "initial-safe-77!", displayName: "U" });
+  await assert.rejects(
+    () => auth.admin.principals.setPassword({ principalId: p.id, newPassword: "bad-pass-9!" }),
+    /known data breaches/
+  );
+});
+
+test("setPassword accepts a clean password and principal can authenticate with it", async () => {
+  const { fetchImpl } = fakeHibp("bad-pass-9!", 500);
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { breachPasswordCheck: { fetchImpl } },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "SPW Clean WS" });
+  const app = await auth.admin.applications.create({ slug: "app", name: "app" });
+  const p = await auth.admin.principals.create({ email: "user2@spw.com", password: "old-pass-77!", displayName: "U2" });
+  await auth.admin.memberships.assignRole({ principalId: p.id, applicationId: app.id, roleId: null });
+  await auth.admin.principals.setPassword({ principalId: p.id, newPassword: "new-safe-pass-99!" });
+  const result = await auth.handlers.login()({
+    body: { applicationId: app.id, email: "user2@spw.com", password: "new-safe-pass-99!" }
+  });
+  assert.equal(result.statusCode, 200, `login after setPassword returned ${result.statusCode}`);
+});
+
+test("setPassword works with breach check off (back-compat)", async () => {
+  const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
+  await auth.admin.bootstrapWorkspace({ name: "SPW Default WS" });
+  const p = await auth.admin.principals.create({ email: "user3@spw.com", password: "initial!", displayName: "U3" });
+  // Breached password accepted when check is off
+  const updated = await auth.admin.principals.setPassword({ principalId: p.id, newPassword: "pw-123456" });
+  assert.ok(updated.id);
+  assert.ok(!updated.passwordHash.includes("pw-123456"), "raw password must not appear in stored hash");
+});
+
+test("setPassword throws for unknown principalId", async () => {
+  const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
+  await auth.admin.bootstrapWorkspace({ name: "SPW Unknown WS" });
+  await assert.rejects(
+    () => auth.admin.principals.setPassword({ principalId: "principal_nonexistent", newPassword: "any-pass!" }),
+    /Principal not found/
+  );
+});
