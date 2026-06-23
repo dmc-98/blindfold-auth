@@ -13,7 +13,7 @@ async function fixture() {
   const app = await auth.admin.applications.create({ slug: "ent", name: "Enterprise" });
   const role = await auth.admin.roles.create({ applicationId: app.id, name: "members" });
   await auth.admin.roles.grantPermission({ applicationId: app.id, roleId: role.id, resource: "workspace", action: "read" });
-  const existing = await auth.admin.principals.create({ email: "founder@acme.co", password: "pw", displayName: "Founder" });
+  const existing = await auth.admin.principals.create({ email: "founder@acme.co", password: "scim-test-password!", displayName: "Founder" });
   await auth.admin.memberships.assignRole({ principalId: existing.id, applicationId: app.id, roleId: role.id });
   const scim = createScimServer({ auth: auth as unknown as ScimEngine });
   return { auth, scim, app, role, existing };

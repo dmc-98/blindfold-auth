@@ -42,7 +42,7 @@ export async function runDoctor(options: Record<string, any> = {}): Promise<Reco
     await record("create principal", async () => {
       principal = await auth.admin.principals.create({
         email: "doctor@x.com",
-        password: "pw-123456",
+        password: "test-password-123!",
         displayName: "Doctor"
       });
       return principal.id;
@@ -63,7 +63,7 @@ export async function runDoctor(options: Record<string, any> = {}): Promise<Reco
     });
     await record("login", async () => {
       const res = await auth.handlers.login()({
-        body: { applicationId: app.id, email: "doctor@x.com", password: "pw-123456" }
+        body: { applicationId: app.id, email: "doctor@x.com", password: "test-password-123!" }
       });
       if (res.statusCode !== 200) {
         throw new Error(`login status ${res.statusCode}`);

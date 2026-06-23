@@ -10,10 +10,10 @@ import { blindfold } from "@dmc--98/blindfold-client";
  *
  *   const t = await createTestAuth({
  *     app: { slug: "billing", name: "Billing" },
- *     users: [{ email: "admin@x.com", password: "pw", roles: ["operator"] }],
+ *     users: [{ email: "admin@x.com", password: "test-password-123!", roles: ["operator"] }],
  *     roles: [{ name: "operator", permissions: [{ resource: "invoice", action: "read" }] }],
  *   });
- *   const session = await t.login("admin@x.com", "pw");
+ *   const session = await t.login("admin@x.com", "test-password-123!");
  *   await t.assertCan("admin@x.com", "invoice", "read");
  *   await t.assertCannot("admin@x.com", "invoice", "delete");
  */

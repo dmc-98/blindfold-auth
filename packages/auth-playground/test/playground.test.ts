@@ -47,7 +47,7 @@ test("ABAC field masking: support reading customer.ssn is masked", async () => {
 test("live authoring: adding a role + policy changes decisions", async () => {
   const sb = await createSandbox();
   await sb.addRole({ name: "auditor", permissions: [{ resource: "ledger", action: "read" }] });
-  await sb.addUser({ email: "carol@demo", password: "pw-123456", roles: ["auditor"] });
+  await sb.addUser({ email: "carol@demo", password: "test-password-123!", roles: ["auditor"] });
 
   const before = await sb.evaluate({ email: "carol@demo", action: "read", resource: "ledger" });
   assert.equal(before.allowed, true);

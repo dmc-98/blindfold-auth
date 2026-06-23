@@ -119,7 +119,7 @@ test("Studio debugger ships the trace renderer and the API returns traces", asyn
     // The debug endpoint returns a trace alongside the decision.
     await auth.admin.bootstrapWorkspace({ name: "Trace WS" });
     const app = await auth.admin.applications.create({ slug: "trace-app", name: "Trace App" });
-    const user = await auth.admin.principals.create({ email: "t@x.com", password: "pw-123456", displayName: "T" });
+    const user = await auth.admin.principals.create({ email: "t@x.com", password: "test-password-123!", displayName: "T" });
     const response = await fetch(`${url}/api/debug`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -156,7 +156,7 @@ test("Studio dry-run endpoint evaluates proposed rules without persisting", asyn
   try {
     await auth.admin.bootstrapWorkspace({ name: "DryRun WS" });
     const app = await auth.admin.applications.create({ slug: "dr-app", name: "DR App" });
-    const user = await auth.admin.principals.create({ email: "dr@x.com", password: "pw-123456", displayName: "DR" });
+    const user = await auth.admin.principals.create({ email: "dr@x.com", password: "test-password-123!", displayName: "DR" });
     const role = await auth.admin.roles.create({ applicationId: app.id, name: "op" });
     await auth.admin.roles.grantPermission({ applicationId: app.id, roleId: role.id, resource: "invoice", action: "read" });
     await auth.admin.memberships.assignRole({ principalId: user.id, applicationId: app.id, roleId: role.id });

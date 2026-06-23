@@ -42,7 +42,7 @@ test("setup() seeds workspace, app, admin, and roles; login + protect end-to-end
   const { application, principal } = await client.setup({
     workspaceName: "Billing WS",
     app: { slug: "billing", name: "Billing" },
-    admin: { email: "admin@x.com", password: "pw-123456" },
+    admin: { email: "admin@x.com", password: "test-password-123!" },
     roles: [
       {
         name: "operator",
@@ -56,7 +56,7 @@ test("setup() seeds workspace, app, admin, and roles; login + protect end-to-end
 
   // login via prebuilt handler
   const loginRes = await client.handlers.login()({
-    body: { applicationId: application.id, email: "admin@x.com", password: "pw-123456" }
+    body: { applicationId: application.id, email: "admin@x.com", password: "test-password-123!" }
   });
   assert.equal(loginRes.statusCode, 200);
   const tokens = JSON.parse(loginRes.body);
@@ -97,7 +97,7 @@ test("Express adapter: mounts /auth routes and guard middleware attaches req.aut
   const client = await blindfold({ project: "exp", secret: "s" });
   const { application } = await client.setup({
     app: { slug: "app", name: "App" },
-    admin: { email: "u@x.com", password: "pw-123456" },
+    admin: { email: "u@x.com", password: "test-password-123!" },
     roles: [{ name: "member", assignToAdmin: true, permissions: [{ resource: "doc", action: "read" }] }]
   });
 
@@ -105,7 +105,7 @@ test("Express adapter: mounts /auth routes and guard middleware attaches req.aut
   const router = blindfoldExpress(client, { prefix: "/auth" });
   const loginResult = await router.dispatch("POST", "/auth/login", {
     headers: {},
-    body: { applicationId: application.id, email: "u@x.com", password: "pw-123456" }
+    body: { applicationId: application.id, email: "u@x.com", password: "test-password-123!" }
   });
   assert.equal(loginResult.statusCode, 200);
   const tokens = typeof loginResult.body === "string" ? JSON.parse(loginResult.body) : loginResult.body;

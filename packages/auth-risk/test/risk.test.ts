@@ -106,7 +106,7 @@ test("integrates over a live blindfold runtime instance", async () => {
 
   await client.setup({
     app: { slug: "app", name: "App" },
-    admin: { email: "u@x.com", password: "pw-123456" },
+    admin: { email: "u@x.com", password: "test-password-123!" },
     roles: [{ name: "member", assignToAdmin: true, permissions: [{ resource: "doc", action: "read" }] }]
   });
 

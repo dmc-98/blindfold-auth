@@ -6,8 +6,8 @@ async function harness() {
   return createTestAuth({
     app: { slug: "billing", name: "Billing" },
     users: [
-      { email: "op@x.com", password: "pw-123456", roles: ["operator"] },
-      { email: "viewer@x.com", password: "pw-123456", roles: ["viewer"] },
+      { email: "op@x.com", password: "test-password-123!", roles: ["operator"] },
+      { email: "viewer@x.com", password: "test-password-123!", roles: ["viewer"] },
     ],
     roles: [
       { name: "operator", permissions: [{ resource: "invoice", action: "read" }, { resource: "invoice", action: "delete" }] },

@@ -45,7 +45,13 @@ export const DEFAULT_SECURITY_CONFIG = {
    * timeoutMs }) passed through to checkPasswordBreached. Fail-open on
    * HIBP outages by design.
    */
-  breachPasswordCheck: false
+  breachPasswordCheck: false,
+  /**
+   * Minimum password length enforced at create and setPassword.
+   * Default: 12 — aligned with OWASP ASVS §2.1.1 and NIST SP 800-63B.
+   * Set to 0 to disable (not recommended for production).
+   */
+  passwordMinLength: 12
 };
 
 export const DEFAULT_AUTH_METHODS = {

@@ -1885,6 +1885,10 @@ export function createAuth({
           throw new Error("Principal email is required");
         }
 
+        if (password && securityConfig.passwordMinLength > 0 && password.length < securityConfig.passwordMinLength) {
+          throw new Error(`Password must be at least ${securityConfig.passwordMinLength} characters (OWASP ASVS §2.1.1)`);
+        }
+
         const existingPrincipal = await getPrincipalByEmail(normalizedEmail);
         if (existingPrincipal) {
           throw new Error("Principal email already exists");
@@ -2015,6 +2019,9 @@ export function createAuth({
       async setPassword({ principalId, newPassword, actorId = "system" }: { principalId: any; newPassword: any; actorId?: any }) {
         if (!newPassword) {
           throw new Error("newPassword is required");
+        }
+        if (securityConfig.passwordMinLength > 0 && newPassword.length < securityConfig.passwordMinLength) {
+          throw new Error(`Password must be at least ${securityConfig.passwordMinLength} characters (OWASP ASVS §2.1.1)`);
         }
         const principal = await storage.get("principals", principalId);
         if (!principal) {

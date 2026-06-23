@@ -44,14 +44,14 @@ test("fail-open by default with a checked:false marker when HIBP is unreachable"
 import { createAuth } from "../src/auth.js";
 
 test("opt-in breachPasswordCheck rejects breached passwords at registration", async () => {
-  const { fetchImpl } = fakeHibp("pw-123456", 1200);
+  const { fetchImpl } = fakeHibp("common-breached-password-123", 1200);
   const auth = createAuth({
     secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
     security: { breachPasswordCheck: { fetchImpl } },
   });
   await auth.admin.bootstrapWorkspace({ name: "Breach WS" });
   await assert.rejects(
-    () => auth.admin.principals.create({ email: "victim@x.com", password: "pw-123456", displayName: "V" }),
+    () => auth.admin.principals.create({ email: "victim@x.com", password: "common-breached-password-123", displayName: "V" }),
     /known data breaches/
   );
   // A clean password registers fine through the same path.
@@ -62,14 +62,14 @@ test("opt-in breachPasswordCheck rejects breached passwords at registration", as
 test("breach check is off by default — breached passwords register (back-compat)", async () => {
   const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
   await auth.admin.bootstrapWorkspace({ name: "Default WS" });
-  const created = await auth.admin.principals.create({ email: "legacy@x.com", password: "pw-123456", displayName: "L" });
+  const created = await auth.admin.principals.create({ email: "legacy@x.com", password: "legacy-password-123456", displayName: "L" });
   assert.ok(created.id);
 });
 
 // ── setPassword wiring ────────────────────────────────────────────────────────
 
 test("setPassword rejects a breached password when breachPasswordCheck is enabled", async () => {
-  const { fetchImpl } = fakeHibp("bad-pass-9!", 500);
+  const { fetchImpl } = fakeHibp("bad-password-breached-123", 500);
   const auth = createAuth({
     secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
     security: { breachPasswordCheck: { fetchImpl } },
@@ -77,13 +77,13 @@ test("setPassword rejects a breached password when breachPasswordCheck is enable
   await auth.admin.bootstrapWorkspace({ name: "SPW Breach WS" });
   const p = await auth.admin.principals.create({ email: "user@spw.com", password: "initial-safe-77!", displayName: "U" });
   await assert.rejects(
-    () => auth.admin.principals.setPassword({ principalId: p.id, newPassword: "bad-pass-9!" }),
+    () => auth.admin.principals.setPassword({ principalId: p.id, newPassword: "bad-password-breached-123" }),
     /known data breaches/
   );
 });
 
 test("setPassword accepts a clean password and principal can authenticate with it", async () => {
-  const { fetchImpl } = fakeHibp("bad-pass-9!", 500);
+  const { fetchImpl } = fakeHibp("bad-password-breached-123", 500);
   const auth = createAuth({
     secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
     security: { breachPasswordCheck: { fetchImpl } },
@@ -102,18 +102,80 @@ test("setPassword accepts a clean password and principal can authenticate with i
 test("setPassword works with breach check off (back-compat)", async () => {
   const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
   await auth.admin.bootstrapWorkspace({ name: "SPW Default WS" });
-  const p = await auth.admin.principals.create({ email: "user3@spw.com", password: "initial!", displayName: "U3" });
-  // Breached password accepted when check is off
-  const updated = await auth.admin.principals.setPassword({ principalId: p.id, newPassword: "pw-123456" });
+  const p = await auth.admin.principals.create({ email: "user3@spw.com", password: "initial-password-ok!", displayName: "U3" });
+  // Common (but long enough) password accepted when breach check is off
+  const updated = await auth.admin.principals.setPassword({ principalId: p.id, newPassword: "another-password-456" });
   assert.ok(updated.id);
-  assert.ok(!updated.passwordHash.includes("pw-123456"), "raw password must not appear in stored hash");
+  assert.ok(!updated.passwordHash.includes("another-password-456"), "raw password must not appear in stored hash");
 });
 
 test("setPassword throws for unknown principalId", async () => {
   const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
   await auth.admin.bootstrapWorkspace({ name: "SPW Unknown WS" });
   await assert.rejects(
-    () => auth.admin.principals.setPassword({ principalId: "principal_nonexistent", newPassword: "any-pass!" }),
+    () => auth.admin.principals.setPassword({ principalId: "principal_nonexistent", newPassword: "any-test-password-123" }),
     /Principal not found/
   );
+});
+
+// ── passwordMinLength hardening-by-default ────────────────────────────────────
+
+test("passwordMinLength: create rejects a password shorter than the configured minimum", async () => {
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { passwordMinLength: 12 },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "PML WS" });
+  await assert.rejects(
+    () => auth.admin.principals.create({ email: "short@x.com", password: "tooshort!", displayName: "S" }),
+    /at least 12/
+  );
+});
+
+test("passwordMinLength: create accepts a password at exactly the minimum length", async () => {
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { passwordMinLength: 12 },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "PML Exact WS" });
+  // Exactly 12 characters
+  const p = await auth.admin.principals.create({ email: "exact@x.com", password: "exactly-12ch", displayName: "E" });
+  assert.ok(p.id);
+});
+
+test("passwordMinLength: setPassword rejects a password shorter than the minimum", async () => {
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { passwordMinLength: 12 },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "PML Set WS" });
+  const p = await auth.admin.principals.create({ email: "user@pml.com", password: "initial-pass-ok", displayName: "U" });
+  await assert.rejects(
+    () => auth.admin.principals.setPassword({ principalId: p.id, newPassword: "too-short!" }),
+    /at least 12/
+  );
+});
+
+test("passwordMinLength: default is 12 (OWASP ASVS §2.1.1)", async () => {
+  // No explicit passwordMinLength in config — default must be 12.
+  const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
+  await auth.admin.bootstrapWorkspace({ name: "PML Default WS" });
+  await assert.rejects(
+    () => auth.admin.principals.create({ email: "default@x.com", password: "tooshort!", displayName: "D" }),
+    /at least 12/
+  );
+  // A password ≥12 chars succeeds without any explicit config.
+  const p = await auth.admin.principals.create({ email: "ok@x.com", password: "long-enough-pass", displayName: "O" });
+  assert.ok(p.id);
+});
+
+test("passwordMinLength: set to 0 disables the check (escape hatch)", async () => {
+  const auth = createAuth({
+    secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9",
+    security: { passwordMinLength: 0 },
+  });
+  await auth.admin.bootstrapWorkspace({ name: "PML Off WS" });
+  // Very short password allowed when check is explicitly disabled.
+  const p = await auth.admin.principals.create({ email: "nopml@x.com", password: "short", displayName: "N" });
+  assert.ok(p.id);
 });

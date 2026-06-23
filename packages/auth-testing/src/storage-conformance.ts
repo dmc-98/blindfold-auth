@@ -93,7 +93,7 @@ export function runStorageConformance({ name, createStorage }: { name: string; c
     // 3. create principal
     const principal = await auth.admin.principals.create({
       email: "user@x.com",
-      password: "pw-123456",
+      password: "test-password-123!",
       displayName: "User"
     });
     // 4. role + permission + membership
@@ -112,7 +112,7 @@ export function runStorageConformance({ name, createStorage }: { name: string; c
 
     // 5. login
     const loginRes = await auth.handlers.login()({
-      body: { applicationId: app.id, email: "user@x.com", password: "pw-123456" }
+      body: { applicationId: app.id, email: "user@x.com", password: "test-password-123!" }
     });
     assert.equal(loginRes.statusCode, 200, "login succeeds");
     const tokens = JSON.parse(loginRes.body);

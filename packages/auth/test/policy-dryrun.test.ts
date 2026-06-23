@@ -6,7 +6,7 @@ async function setup() {
   const auth = createAuth({ secret: "f3a9c2e1d4b5a697-8a1b2c3d4e5f6071-8293a4b5c6d7e8f9" });
   await auth.admin.bootstrapWorkspace({ name: "DryRun WS" });
   const app = await auth.admin.applications.create({ slug: "billing", name: "Billing" });
-  const user = await auth.admin.principals.create({ email: "op@x.com", password: "pw-123456", displayName: "Op" });
+  const user = await auth.admin.principals.create({ email: "op@x.com", password: "policy-test-password!", displayName: "Op" });
   const role = await auth.admin.roles.create({ applicationId: app.id, name: "operator" });
   await auth.admin.roles.grantPermission({ applicationId: app.id, roleId: role.id, resource: "invoice", action: "read" });
   await auth.admin.memberships.assignRole({ principalId: user.id, applicationId: app.id, roleId: role.id });
