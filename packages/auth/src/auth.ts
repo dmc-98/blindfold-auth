@@ -81,6 +81,23 @@ export function createAuth({
   const initialization = storage.ensureTables(TABLES);
   const oidcConfigurationCache = new Map();
 
+  const AUDIT_GENESIS_HASH = "0".repeat(64);
+
+  /**
+   * Stable payload for chain-hash computation.
+   * Excludes `chainHash` (which is derived) but includes `prevHash` (which anchors the chain).
+   * Keys are sorted so serialization is deterministic regardless of insertion order.
+   */
+  function auditEventPayload(record: Record<string, unknown>): string {
+    const { chainHash: _omit, ...rest } = record;
+    return JSON.stringify(rest, Object.keys(rest).sort());
+  }
+
+  /** SHA-256 of the event's stable payload (prevHash is embedded in the record). */
+  function computeChainHash(record: Record<string, unknown>): string {
+    return sha256(auditEventPayload(record));
+  }
+
   async function writeAuditEvent(event: any) {
     const record = withTimestamps(
       {
@@ -91,8 +108,24 @@ export function createAuth({
       null
     );
 
-    await storage.put("audit_events", record);
-    return record;
+    // Find the chain tail: the event whose chainHash is not referenced as a prevHash
+    // by any other event.  This is O(n) but avoids any timestamp tie-breaking issues.
+    const existing = await storage.list("audit_events");
+    let prevHash = AUDIT_GENESIS_HASH;
+    if (existing.length > 0) {
+      const referencedPrevHashes = new Set(existing.map((e: any) => e.prevHash).filter(Boolean));
+      const tails = existing.filter((e: any) => e.chainHash && !referencedPrevHashes.has(e.chainHash));
+      const tail = tails.length === 1
+        ? tails[0]
+        : existing.sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
+      prevHash = (tail as any).chainHash ?? AUDIT_GENESIS_HASH;
+    }
+
+    const recordWithPrev = { ...record, prevHash };
+    const chainedRecord = { ...recordWithPrev, chainHash: computeChainHash(recordWithPrev) };
+
+    await storage.put("audit_events", chainedRecord);
+    return chainedRecord;
   }
 
   async function getWorkspaceConfig() {
@@ -2425,6 +2458,59 @@ export function createAuth({
       async list({ limit = 100 }: { limit?: any } = {}) {
         const events = await storage.list("audit_events");
         return events.sort((left: any, right: any) => right.createdAt.localeCompare(left.createdAt)).slice(0, limit);
+      },
+
+      /**
+       * Walk the audit-event chain by following prevHash pointers (linked-list
+       * traversal) and verify each event's chainHash = SHA-256(stablePayload).
+       *
+       * This is order-independent: no sort required, so timestamp collisions
+       * between events cannot cause false positives.
+       *
+       * Returns:
+       *   { ok: true, verifiedCount: N }               — chain intact
+       *   { ok: false, verifiedCount: N, brokenAt: id } — first bad event
+       */
+      async verify(): Promise<{ ok: boolean; verifiedCount: number; brokenAt?: string }> {
+        const events = await storage.list("audit_events");
+        if (events.length === 0) return { ok: true, verifiedCount: 0 };
+
+        // Build lookup: prevHash → event (who follows a given hash pointer)
+        const byPrevHash = new Map<string, any>();
+        for (const event of events) {
+          const prev = (event as any).prevHash ?? AUDIT_GENESIS_HASH;
+          byPrevHash.set(prev, event);
+        }
+
+        // Walk from genesis, following the chain
+        let cursor = AUDIT_GENESIS_HASH;
+        let verifiedCount = 0;
+
+        while (byPrevHash.has(cursor)) {
+          const event = byPrevHash.get(cursor) as any;
+          const expected = computeChainHash(event);
+          if (event.chainHash !== expected) {
+            return { ok: false, verifiedCount, brokenAt: event.id };
+          }
+          cursor = event.chainHash;
+          verifiedCount++;
+        }
+
+        // If we've verified fewer events than exist, there's a gap/fork
+        if (verifiedCount !== events.length) {
+          // Find the first unreachable event (any event not reached from genesis)
+          const reachable = new Set<string>();
+          let cur2 = AUDIT_GENESIS_HASH;
+          while (byPrevHash.has(cur2)) {
+            const ev = byPrevHash.get(cur2) as any;
+            reachable.add(ev.id);
+            cur2 = ev.chainHash;
+          }
+          const orphan = (events as any[]).find((e) => !reachable.has(e.id));
+          return { ok: false, verifiedCount, brokenAt: orphan?.id };
+        }
+
+        return { ok: true, verifiedCount };
       }
     },
     exportSnapshot,
