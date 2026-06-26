@@ -1,4 +1,13 @@
 import { DEFAULT_AUTH_METHODS, DEFAULT_SECURITY_CONFIG, DEFAULT_SESSION_CONFIG, TABLES } from "./constants.js";
+
+/** Injectable verifier type for passkey MFA — avoids exposing @simplewebauthn/server types in public signatures. */
+type PasskeyVerifyFn = (input: {
+  response: any;
+  challenge: any;
+  expectedOrigins: any;
+  rpID: any;
+  credential: any;
+}) => Promise<{ verified: boolean; authenticationInfo: { newCounter: number; credentialID: any } }>;
 import { buildOidcRedirectUrl, buildSamlMetadata, mapFederationClaims, resolveProviderChoice } from "./federation.js";
 import { buildOidcAuthorizationRequest, calculateOidcCodeChallenge, discoverOidcConfiguration, exchangeOidcAuthorizationCode } from "./oidc.js";
 import {
@@ -635,6 +644,21 @@ export function createAuth({
     }
 
     await recordAttempt(true);
+
+    // Passkey-first MFA: if the principal has passkey MFA enabled and holds at
+    // least one active passkey credential, return a step-up challenge instead of
+    // issuing a session. The caller (login handler) maps this to HTTP 202.
+    const requiresPasskeyMfa = (principal as any).mfa?.passkey?.enabled;
+    if (requiresPasskeyMfa) {
+      const activePasskeys = (await listPasskeys({ principalId: principal.id, applicationId }))
+        .filter((c: any) => c.status !== "revoked");
+      if (activePasskeys.length > 0) {
+        const mfaChallenge = await beginPasskeyMfaChallenge({ principalId: principal.id, applicationId });
+        return { passkeyMfaRequired: true, ...mfaChallenge };
+      }
+      // Graceful fallback: no active passkeys → issue normal password session
+    }
+
     return issueSession({
       applicationId,
       principal,
@@ -985,6 +1009,115 @@ export function createAuth({
       type: "passkey.authenticated",
       actorId: principal.id,
       principalId: principal.id,
+      applicationId,
+      data: { credentialId: credential.credentialId }
+    });
+
+    return sessionResult;
+  }
+
+  /**
+   * Issue a short-lived passkey MFA challenge after a successful password check.
+   * Creates a `webauthn_mfa` challenge (distinct from `webauthn_authentication`)
+   * and a signed pending token that binds the challenge to the authenticated principal.
+   */
+  async function beginPasskeyMfaChallenge(
+    { principalId, applicationId }: { principalId: any; applicationId: any },
+    request: any = {}
+  ) {
+    const application = await getApplication(applicationId);
+    const appConfig = await getEffectiveAppConfig(applicationId);
+    const credentials = await listPasskeys({ principalId, applicationId });
+
+    const { options, passkeyConfig } = await createPasskeyAuthenticationOptions({
+      application,
+      appConfig,
+      request,
+      credentials: credentials.filter((c: any) => c.status !== "revoked")
+    });
+
+    const challenge = await createChallengeRecord({
+      type: "webauthn_mfa",
+      applicationId,
+      principalId,
+      challenge: options.challenge,
+      rpID: passkeyConfig.rpID,
+      expectedOrigins: passkeyConfig.origins,
+      expiresAt: new Date(now() + 5 * 60_000).toISOString()
+    });
+
+    const pendingToken = signToken(
+      { kind: "passkey_mfa_pending", principalId, applicationId, exp: now() + 5 * 60_000 },
+      secret
+    );
+
+    return { pendingToken, challengeId: challenge.id, options };
+  }
+
+  /**
+   * Complete passkey-as-second-factor authentication.
+   *
+   * @param verifyFn - Injectable verification function; defaults to the real
+   *   `verifyPasskeyAuthenticationResult`. Pass a stub in tests.
+   */
+  async function completePasskeyMfa(
+    { pendingToken, applicationId, challengeId, response }: {
+      pendingToken: any; applicationId: any; challengeId: any; response: any
+    },
+    request: any = {},
+    verifyFn: PasskeyVerifyFn = verifyPasskeyAuthenticationResult
+  ) {
+    // 1. Validate the pending token
+    const payload = verifySignedToken(pendingToken, secret);
+    if (!payload || payload.kind !== "passkey_mfa_pending") {
+      throw new Error("Invalid MFA token");
+    }
+    if (payload.exp < now()) {
+      throw new Error("MFA token expired");
+    }
+    if (payload.applicationId !== applicationId) {
+      throw new Error("MFA token application mismatch");
+    }
+    const { principalId } = payload;
+
+    // 2. Validate the WebAuthn MFA challenge
+    const challenge = await assertChallengeRecord({ id: challengeId, type: "webauthn_mfa", applicationId });
+
+    // 3. Find the credential and verify it belongs to the pending principal
+    const credential = await findPasskeyCredential({ applicationId, credentialId: response?.id });
+    if (!credential) throw new Error("Passkey credential not found");
+    if (credential.principalId !== principalId) {
+      throw new Error("Passkey credential does not belong to this principal");
+    }
+
+    // 4. Verify the WebAuthn assertion
+    const verification = await verifyFn({
+      response,
+      challenge: challenge.challenge,
+      expectedOrigins: challenge.expectedOrigins,
+      rpID: challenge.rpID,
+      credential
+    });
+    if (!verification.verified) throw new Error("Passkey MFA verification failed");
+
+    // 5. Update counter + mark challenge used
+    await storage.put(
+      "webauthn_credentials",
+      withTimestamps(
+        { ...credential, counter: verification.authenticationInfo.newCounter, lastUsedAt: new Date().toISOString() },
+        credential
+      )
+    );
+    await completeChallengeRecord(challenge);
+
+    // 6. Issue session with elevated auth strength
+    const principal = await storage.get("principals", principalId);
+    const sessionResult = await issueSession({ applicationId, principal, authStrength: "mfa_passkey" });
+
+    await writeAuditEvent({
+      type: "passkey.mfa_completed",
+      actorId: principalId,
+      principalId,
       applicationId,
       data: { credentialId: credential.credentialId }
     });
@@ -2005,6 +2138,32 @@ export function createAuth({
         });
         return principal;
       },
+      /**
+       * Enable passkey as a second factor for this principal.
+       * After enabling, password login will return a passkey MFA challenge
+       * instead of a session when the principal has at least one active passkey.
+       */
+      async enablePasskeyMfa({ principalId, actorId = "system" }: { principalId: any; actorId?: any }) {
+        const principal = await storage.get("principals", principalId);
+        if (!principal) throw new Error("Principal not found");
+        (principal as any).mfa ||= {};
+        (principal as any).mfa.passkey = { enabled: true };
+        await storage.put("principals", withTimestamps(principal, principal));
+        await writeAuditEvent({ type: "principal.mfa_passkey_enabled", actorId, principalId, data: {} });
+        return principal;
+      },
+
+      /** Disable passkey-as-second-factor for this principal. */
+      async disablePasskeyMfa({ principalId, actorId = "system" }: { principalId: any; actorId?: any }) {
+        const principal = await storage.get("principals", principalId);
+        if (!principal) throw new Error("Principal not found");
+        (principal as any).mfa ||= {};
+        (principal as any).mfa.passkey = { enabled: false };
+        await storage.put("principals", withTimestamps(principal, principal));
+        await writeAuditEvent({ type: "principal.mfa_passkey_disabled", actorId, principalId, data: {} });
+        return principal;
+      },
+
       /** Set a principal's status (`active` | `disabled`). */
       async setStatus({ principalId, status, actorId = "system" }: { principalId: any; status: "active" | "disabled"; actorId?: any }) {
         if (status !== "active" && status !== "disabled") {
@@ -2649,7 +2808,9 @@ export function createAuth({
               mfaCode: request.body?.mfaCode,
               recoveryCode: request.body?.recoveryCode
             });
-            return toResponse(200, result);
+            // Passkey MFA step-up: return 202 so the client knows to complete the ceremony
+            const status = (result as any).passkeyMfaRequired ? 202 : 200;
+            return toResponse(status, result);
           } catch (error) {
             return toResponse(401, { error: (error as Error).message });
           }
@@ -2772,6 +2933,32 @@ export function createAuth({
                   response: request.body?.response
                 },
                 request
+              );
+              return toResponse(200, result);
+            } catch (error) {
+              return toResponse(401, { error: (error as Error).message });
+            }
+          };
+        },
+
+        /**
+         * Complete passkey-as-second-factor (MFA) authentication.
+         *
+         * Accepts an optional `verifyFn` for dependency injection in tests.
+         * In production the real @simplewebauthn/server verifier is used.
+         */
+        completeMfa({ verifyFn }: { verifyFn?: PasskeyVerifyFn } = {}) {
+          return async (request: any = {}) => {
+            try {
+              const result = await completePasskeyMfa(
+                {
+                  pendingToken: request.body?.pendingToken,
+                  applicationId: request.body?.applicationId,
+                  challengeId: request.body?.challengeId,
+                  response: request.body?.response
+                },
+                request,
+                verifyFn
               );
               return toResponse(200, result);
             } catch (error) {
