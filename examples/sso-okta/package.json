@@ -1,0 +1,25 @@
+{
+  "name": "@dmc--98/example-sso-okta",
+  "version": "0.0.1",
+  "description": "Blindfold Auth — Okta OIDC SSO recipe example (see docs/sso/okta.md for the step-by-step guide)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npx ts-node --esm setup.ts",
+    "start": "npx ts-node --esm server.ts",
+    "dev": "node --env-file=.env --loader ts-node/esm server.ts"
+  },
+  "dependencies": {
+    "@dmc--98/blindfold-auth": "^0.1.1",
+    "@dmc--98/blindfold-sso": "^0.1.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}
