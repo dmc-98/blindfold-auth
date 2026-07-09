@@ -8,9 +8,10 @@ the steps from scratch should have a working enterprise login in under 30 minute
 
 | IdP | Protocol | Guide | Example |
 |-----|----------|-------|---------|
-| Okta | OIDC | [okta.md](./okta.md) | `examples/sso-okta/` |
+| Okta | OIDC + SAML | [okta.md](./okta.md) | `examples/sso-okta/` |
+| Microsoft Entra ID (Azure AD) | OIDC + SAML | [entra.md](./entra.md) | `examples/sso-entra/` |
 
-> Entra ID (Azure AD) and Google Workspace recipes are on the roadmap.
+> Google Workspace recipe is on the roadmap.
 
 ## How federation works
 
