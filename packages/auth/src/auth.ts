@@ -93,6 +93,14 @@ export function createAuth({
   const AUDIT_GENESIS_HASH = "0".repeat(64);
 
   /**
+   * In-memory tail pointer for the audit-event hash chain.
+   * Null means "not yet initialized from storage" — we do one list() scan on
+   * the first writeAuditEvent call, then maintain the pointer ourselves so
+   * every subsequent write is O(1) instead of O(n).
+   */
+  let auditChainTailHash: string | null = null;
+
+  /**
    * Stable payload for chain-hash computation.
    * Excludes `chainHash` (which is derived) but includes `prevHash` (which anchors the chain).
    * Keys are sorted so serialization is deterministic regardless of insertion order.
@@ -117,23 +125,32 @@ export function createAuth({
       null
     );
 
-    // Find the chain tail: the event whose chainHash is not referenced as a prevHash
-    // by any other event.  This is O(n) but avoids any timestamp tie-breaking issues.
-    const existing = await storage.list("audit_events");
-    let prevHash = AUDIT_GENESIS_HASH;
-    if (existing.length > 0) {
-      const referencedPrevHashes = new Set(existing.map((e: any) => e.prevHash).filter(Boolean));
-      const tails = existing.filter((e: any) => e.chainHash && !referencedPrevHashes.has(e.chainHash));
-      const tail = tails.length === 1
-        ? tails[0]
-        : existing.sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
-      prevHash = (tail as any).chainHash ?? AUDIT_GENESIS_HASH;
+    // Determine the chain tail hash.  We maintain an in-memory pointer
+    // (auditChainTailHash) that is initialized lazily from storage on the first
+    // call and updated after every write — making steady-state writes O(1)
+    // instead of the original O(n) storage.list() scan.
+    if (auditChainTailHash === null) {
+      // First write in this runtime instance: scan storage once to find the
+      // existing tail (correct even for a pre-populated persistent store).
+      const existing = await storage.list("audit_events");
+      if (existing.length === 0) {
+        auditChainTailHash = AUDIT_GENESIS_HASH;
+      } else {
+        const referencedPrevHashes = new Set(existing.map((e: any) => e.prevHash).filter(Boolean));
+        const tails = existing.filter((e: any) => e.chainHash && !referencedPrevHashes.has(e.chainHash));
+        const tail = tails.length === 1
+          ? tails[0]
+          : existing.sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt))[0];
+        auditChainTailHash = (tail as any).chainHash ?? AUDIT_GENESIS_HASH;
+      }
     }
 
-    const recordWithPrev = { ...record, prevHash };
+    const recordWithPrev = { ...record, prevHash: auditChainTailHash };
     const chainedRecord = { ...recordWithPrev, chainHash: computeChainHash(recordWithPrev) };
 
     await storage.put("audit_events", chainedRecord);
+    // Advance the tail pointer — all subsequent writes are O(1).
+    auditChainTailHash = chainedRecord.chainHash;
     return chainedRecord;
   }
 
