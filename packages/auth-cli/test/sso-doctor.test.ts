@@ -3,11 +3,11 @@ import assert from "node:assert";
 import { analyzeSsoMetadata, checkSsoUrlSafety } from "../src/sso-doctor.js";
 
 // Self-signed cert that sits inside the 30-day near-expiry warning window.
-// Expires Jul 18 2026 (25 days from generation on Jun 23 2026).
+// Expires Aug 9 2026 (20 days from generation on Jul 20 2026).
 // To regenerate: openssl req -x509 -newkey rsa:2048 -keyout /tmp/k.key -out /tmp/c.pem \
-//   -days 25 -nodes -subj "/CN=idp.test" && \
+//   -days 20 -nodes -subj "/CN=idp.test" && \
 //   openssl x509 -in /tmp/c.pem -outform DER | base64 -w 0
-const SHORT_LIVED_CERT = "MIIDBzCCAe+gAwIBAgIUbfqa+GjKcq1Wm3+OFo7LQJXAoocwDQYJKoZIhvcNAQELBQAwEzERMA8GA1UEAwwIaWRwLnRlc3QwHhcNMjYwNjIzMTYyNDEyWhcNMjYwNzE4MTYyNDEyWjATMREwDwYDVQQDDAhpZHAudGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMT3c53AB7PAjHWv9EfTCJxcCqoQNAWpP0TGeBjR+Vs6Jr3k9FUmwBJ+ngpqHTCVs3d6wyjVtFkNjPYcPXHa1c3Ek28fCQ3KqJqK388K81/tHshuse+bggkbOOUUVeFpQ5sJKJr+z4cgbE8zWY2jAVK8O+RQsX4Wb3Bc23MU18xjfCeHb6x22wJqzXpGpxi1GNldAiSQO6b9UGD4WPToZz5IyeWWbVPJOPb1na4LiRbS4r/ck4WUixYjGk9yof2xfwW4B1gdqgTouHWaUnRpHrp+U0vf+fkyEdcsumyYHbK5wvwW3flKmaPfgdk7YZgj0drTtlatvESF0LsxF3fEY2sCAwEAAaNTMFEwHQYDVR0OBBYEFBvSp57kO4eW1g/w1uiNBFQRDnUPMB8GA1UdIwQYMBaAFBvSp57kO4eW1g/w1uiNBFQRDnUPMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADLgj1wnMpAcXHQV0AQ5EjXhmb97Zv1aUAT7wpKq2in8dIYGkCizGpUyV2ojIvlYthIMGkqSbrYo8CSB1jP4qzQF+9+wN8uzgtucox1gjVjctj5+2RIo6Ptcl0a7WGVqQDHvcJwfxY7BjTY2/FzovboXrc/hdkIbdjcc+CptsXHLovez5cWo4rqx5fi854XA7DoYnUAl6ASwRCnpBJ43ytgOVIV/v1PWalP5HDHDbZKmvGh1FPwePo/RXm4uG2/dlN7hcNyejl3XhzEfE987B5r1Ne5kyaNwq+uB41oBNwmpUxGVM272csKz1cA+D8kXNEGgLy1nAY90Zfq0hvOATAs=";
+const SHORT_LIVED_CERT = "MIIDBzCCAe+gAwIBAgIUT/s8U40vuplbcynROWAwgLrpm0IwDQYJKoZIhvcNAQELBQAwEzERMA8GA1UEAwwIaWRwLnRlc3QwHhcNMjYwNzIwMTEyMDQwWhcNMjYwODA5MTEyMDQwWjATMREwDwYDVQQDDAhpZHAudGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOOQ9LAzAn22rJqobzPjiqpTJUU9Qi8/Rj88NfUkvX3tjn25sUcrP39fLqh6hZhEy0GFGAEj+kJaHfIBiMhZF3Xw8PaRUeDotY+qA0dzjBGoWXP5JjvSsizIlsPNpX9FJGwWJfslGFW9lv0JpVpfkkWIRGiATdZF9Ekxgp58UIFVtVrSnpmnK5ELccBeqj7Ta6P39yfYtJTVvdJvJGbB3S/bluDBHCIMwquXOICg7rWjQ8evwDAhC5USn7YItEkkCKt3QS4Isu3EGaasa9+V6E7ES08ymk9S4C4s2OSYEJNvxWp2lI/D6rXZW8flBzc9pQVwZERbnms+1jJ1Mh60pzsCAwEAAaNTMFEwHQYDVR0OBBYEFBcr84kdRrOgDdoMFDxVr0iF5lEOMB8GA1UdIwQYMBaAFBcr84kdRrOgDdoMFDxVr0iF5lEOMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAMGmZvmzLGd9ee9iBbFz67lMDX67nn5q9mX41xaQXLdJ/0/bWQ9sQBgo0uInnysSGMUxysr5udDQsoy8GO05k+XbuCxQHJnapTxF+kp0hRByL2FjjGO5OhJx5bo9gXmOL3aOrAnZyN1ZxMTtvyzCGYQX2//83FvoTnA/tNRgFIjWulbY+ArSXly/PSFjMqKv/KXdW7Ds8UT5qAVD9aV/UPDsVzmM6MwqPSJTRdbGsZjycgDBol9WLNoS666sRAHJLkraNHWUVclgQhN8PlncMZkiquL7SehAQzvvWPpN8l8Kv7bq0qf/6E3++qzNwdjcB5najlIsST3aM7pU4K46JDQ=";
 
 const GOOD_OIDC = JSON.stringify({
   issuer: "https://idp.example.com",

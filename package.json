@@ -37,12 +37,16 @@
     "bootstrap:postgres-example": "node packages/auth-cli/dist/bin/blindfold-auth.js bootstrap --config ./examples/postgres-workspace/dist/blindfold.config.js --workspace-name \"Blindfold Postgres Workspace\"",
     "studio:postgres-example": "node packages/auth-cli/dist/bin/blindfold-auth.js studio --config ./examples/postgres-workspace/dist/blindfold.config.js --port 4110",
     "smoke:postgres-example": "node ./examples/postgres-workspace/dist/smoke.js",
-    "smoke:lambda-example": "node ./examples/lambda-dynamodb/dist/invoke.js"
+    "smoke:lambda-example": "node ./examples/lambda-dynamodb/dist/invoke.js",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "gifenc": "^1.0.3",
     "playwright": "^1.60.0",
     "pngjs": "^7.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitepress": "^1.3.4"
   }
 }

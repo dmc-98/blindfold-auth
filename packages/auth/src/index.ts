@@ -7,3 +7,11 @@ export { generateTotpSecret, getTotpCode, verifyTotpCode, generateRecoveryCodes 
 export type { Storage, StorageRecord, AuthRequest, AuthResponse, PolicyDecision, Json } from "./types.js";
 export { checkPasswordBreached } from "./breach-check.js";
 export type { BreachCheckResult, BreachCheckOptions } from "./breach-check.js";
+export { importFromBetterAuth } from "./importers/better-auth.js";
+export type {
+  BetterAuthUser,
+  BetterAuthImportOptions,
+  BetterAuthImportResult,
+  ImportedPrincipal,
+  BlindfoldAuthHandle,
+} from "./importers/better-auth.js";
