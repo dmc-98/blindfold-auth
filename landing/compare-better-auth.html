@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blindfold vs Better Auth — Blindfold Auth</title>
+<meta name="description" content="Blindfold Auth vs Better Auth: a detailed comparison of self-hosted auth libraries — ABAC depth, field masking, audit log, Studio debugger, and pricing model." />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06070d;--bg2:#0a0c16;--panel:rgba(255,255,255,.025);--panel2:rgba(255,255,255,.04);
+    --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.14);
+    --fg:#f3f5fb;--muted:#9aa6c4;--faint:#67718f;
+    --accent:#6e8bff;--accent2:#a86bff;--cyan:#46e0d0;--ok:#34d399;--bad:#fb7185;--warn:#fcc15a;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --r:16px;--maxw:1100px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:-2;background:
+    radial-gradient(900px 500px at 78% -8%,rgba(110,139,255,.22),transparent 60%),
+    radial-gradient(800px 500px at 12% 8%,rgba(168,107,255,.16),transparent 55%),
+    radial-gradient(700px 700px at 50% 120%,rgba(70,224,208,.10),transparent 60%),var(--bg);}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .muted{color:var(--muted);}
+  .grad{background:linear-gradient(110deg,var(--accent),var(--accent2) 55%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s;
+    background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 24px rgba(110,139,255,.28);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(110,139,255,.4);}
+  .btn.ghost{background:var(--panel2);border-color:var(--line2);color:var(--fg);box-shadow:none;}
+  .btn.ghost:hover{background:rgba(255,255,255,.07);}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,7,13,.6);border-bottom:1px solid var(--line);}
+  nav .inner{display:flex;align-items:center;gap:24px;max-width:var(--maxw);margin:0 auto;padding:13px 24px;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--fg);}
+  .brand .mk{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;}
+  .brand .mk svg{width:13px;height:13px;fill:#fff;}
+  nav .links{display:flex;gap:20px;}
+  nav .links a{font-size:13.5px;color:var(--muted);font-weight:500;}
+  nav .links a:hover{color:var(--fg);}
+  nav .sp{flex:1;}
+  @media(max-width:700px){nav .links{display:none;}}
+
+  /* breadcrumb */
+  .breadcrumb{padding:28px 24px 0;max-width:var(--maxw);margin:0 auto;}
+  .breadcrumb a{font-size:13px;color:var(--muted);}
+  .breadcrumb a:hover{color:var(--fg);}
+
+  /* hero */
+  .page-hero{padding:36px 24px 48px;max-width:780px;}
+  .page-hero h1{font-size:clamp(28px,5vw,48px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:14px 0 16px;}
+  .page-hero .lead{font-size:17px;line-height:1.65;color:var(--muted);max-width:600px;margin:0;}
+
+  /* TL;DR */
+  .tldr-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 24px 0;max-width:var(--maxw);margin:0 auto 48px;}
+  @media(max-width:640px){.tldr-grid{grid-template-columns:1fr;}}
+  .tldr-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px 26px;}
+  .bf-card{border-color:rgba(70,224,208,.3);background:rgba(70,224,208,.06);}
+  .tldr-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px;}
+  .bf-card .tldr-label{color:var(--cyan);}
+  .tldr-card ul{margin:0;padding-left:16px;color:var(--fg);}
+  .tldr-card li{margin-bottom:7px;font-size:14px;line-height:1.5;}
+
+  /* sections */
+  section.content{padding:0 24px 48px;max-width:var(--maxw);margin:0 auto;}
+  .section-title{font-size:21px;font-weight:700;margin:0 0 18px;color:var(--fg);}
+
+  /* comparison table */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line2);border-radius:14px;}
+  table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.cmp thead{background:rgba(255,255,255,.03);}
+  table.cmp th{padding:13px 18px;text-align:left;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--faint);
+    border-bottom:1px solid var(--line);}
+  table.cmp th.col-bf{color:var(--cyan);}
+  table.cmp td{padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5;}
+  table.cmp tr:last-child td{border-bottom:none;}
+  .col-bf{background:rgba(70,224,208,.04);}
+  .dim{font-weight:600;color:var(--fg);white-space:nowrap;min-width:160px;}
+  .good{color:var(--ok);}
+  .neutral{color:var(--muted);}
+  .na{color:var(--faint);}
+  .warn-text{color:var(--warn);}
+  code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;}
+
+  /* differentiator cards */
+  .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:680px){.diff-grid{grid-template-columns:1fr;}}
+  .diff-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px 26px;}
+  .diff-card h3{font-size:15px;font-weight:700;margin:0 0 10px;color:var(--fg);}
+  .diff-card p{font-size:13.5px;color:var(--muted);margin:0 0 8px;line-height:1.6;}
+  .diff-card p:last-child{margin:0;}
+  .diff-icon{font-size:22px;margin-bottom:10px;display:block;}
+  .bf-diff{border-color:rgba(70,224,208,.25);background:rgba(70,224,208,.05);}
+
+  /* migration note */
+  .migration-card{background:var(--panel2);border:1px solid rgba(252,193,90,.3);
+    border-radius:14px;padding:24px 28px;background:rgba(252,193,90,.05);}
+  .migration-card h3{font-size:16px;font-weight:700;color:var(--warn);margin:0 0 10px;}
+  .migration-card p{font-size:14px;color:var(--muted);margin:0 0 10px;line-height:1.6;}
+  .migration-card code{font-size:12px;}
+  .migration-card ul{margin:8px 0 0;padding-left:16px;font-size:14px;color:var(--fg);}
+  .migration-card li{margin-bottom:6px;}
+
+  /* disclaimer */
+  .note{font-size:12px;color:var(--faint);margin-top:10px;line-height:1.55;}
+
+  /* CTA */
+  .cta-band{background:linear-gradient(135deg,rgba(70,224,208,.1),rgba(110,139,255,.12));
+    border:1px solid var(--line2);border-radius:18px;padding:40px;text-align:center;
+    margin:0 24px 64px;max-width:var(--maxw);}
+  .cta-band-wrap{max-width:var(--maxw);margin:0 auto;}
+  .cta-band h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px;}
+  .cta-band p{color:var(--muted);font-size:16px;margin:0 0 24px;}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:28px 24px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    max-width:var(--maxw);margin:0 auto;}
+  footer p{margin:0;font-size:13px;color:var(--faint);}
+  footer a{color:var(--faint);}
+  footer a:hover{color:var(--fg);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <span class="mk"><svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1ZM6.5 5.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM8 10.5c-1.8 0-3.3-.9-4-2.2.7-.2 2-.3 4-.3s3.3.1 4 .3c-.7 1.3-2.2 2.2-4 2.2Z"/></svg></span>
+      Blindfold Auth
+    </a>
+    <div class="links">
+      <a href="index.html#features">Features</a>
+      <a href="index.html#compare">Compare</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="https://github.com/dmc-98/blindfold-auth" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="sp"></div>
+    <a class="btn ghost" href="index.html#start">Get started — free</a>
+  </div>
+</nav>
+
+<div class="breadcrumb"><a href="index.html#compare">← Compare</a></div>
+
+<div class="wrap page-hero">
+  <span class="eyebrow">Comparison</span>
+  <h1>Blindfold vs <span class="grad">Better Auth</span></h1>
+  <p class="lead">
+    Both are open-source, self-hostable Node.js auth libraries. The split comes down to scope:
+    Better Auth covers more frameworks and ecosystem breadth; Blindfold goes deeper on
+    authorization depth, data sovereignty, and operator tooling.
+  </p>
+</div>
+
+<!-- TL;DR -->
+<div class="tldr-grid">
+  <div class="tldr-card bf-card">
+    <div class="tldr-label">Choose Blindfold when…</div>
+    <ul>
+      <li>Your app needs RBAC + ABAC together — roles, attributes, <em>and</em> field-level masking in one policy DSL.</li>
+      <li>You need explainable authorization: trace exactly why a request was allowed, denied, or masked.</li>
+      <li>A tamper-evident, hash-chained audit log is a compliance requirement.</li>
+      <li>Your team wants a Studio UI to write, test, and dry-run policy changes without touching code.</li>
+      <li>You cannot have user data leave your infrastructure under any circumstances.</li>
+    </ul>
+  </div>
+  <div class="tldr-card">
+    <div class="tldr-label">Choose Better Auth when…</div>
+    <ul>
+      <li>You're on a framework Blindfold doesn't support yet (SvelteKit, Remix, Nuxt, Astro, etc.).</li>
+      <li>You need a large plugin ecosystem: Stripe, Expo, Next-specific helpers, etc.</li>
+      <li>Simpler role-based access control is sufficient and you don't need attribute-level policy logic.</li>
+      <li>You want a larger, more active community and frequent minor releases.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Feature table -->
+<section class="content">
+  <h2 class="section-title">Feature comparison</h2>
+  <div class="tablewrap">
+    <table class="cmp">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th class="col-bf">Blindfold Auth</th>
+          <th>Better Auth</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="dim">Licence</td>
+          <td class="col-bf good">Apache 2.0 — fully open, all features</td>
+          <td>MIT — fully open</td>
+        </tr>
+        <tr>
+          <td class="dim">Pricing</td>
+          <td class="col-bf good">Free forever — no tiers, no MAU limit, no enterprise gate</td>
+          <td>Free — no paid tier (as of July 2026)</td>
+        </tr>
+        <tr>
+          <td class="dim">Data residency</td>
+          <td class="col-bf good">100% self-hosted; no outbound data calls; no telemetry</td>
+          <td class="neutral">Self-hosted; optional cloud features in roadmap</td>
+        </tr>
+        <tr>
+          <td class="dim">RBAC</td>
+          <td class="col-bf good">Built-in — roles, permissions, wildcard matching</td>
+          <td>Built-in — role plugin</td>
+        </tr>
+        <tr>
+          <td class="dim">ABAC / attribute policies</td>
+          <td class="col-bf good">Full ABAC — subject / resource / environment conditions</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Field masking</td>
+          <td class="col-bf good">Per-field masking in policies (e.g. blur SSN for non-admin)</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Policy DSL</td>
+          <td class="col-bf good">Declarative allow/deny/mask rules; dry-run mode; <code>explain()</code> traces</td>
+          <td class="neutral">Imperative via plugin callbacks</td>
+        </tr>
+        <tr>
+          <td class="dim">Explainable authz</td>
+          <td class="col-bf good"><code>auth.explain()</code> → per-rule outcomes, deciding rule, obligation list</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Policy dry-run</td>
+          <td class="col-bf good"><code>admin.policies.dryRun()</code> — overlay proposed rules, see before/after</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Policy test runner</td>
+          <td class="col-bf good"><code>runPolicySuite()</code> — table-driven allow/deny/mask tests, self-explaining failures</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Studio / UI debugger</td>
+          <td class="col-bf good">Blindfold Studio: policy debugger, what-if panel, free forever</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Audit log</td>
+          <td class="col-bf good">Hash-chained, tamper-detectable; <code>admin.audit.verify()</code></td>
+          <td class="neutral">Event hooks; no built-in tamper detection</td>
+        </tr>
+        <tr>
+          <td class="dim">MFA</td>
+          <td class="col-bf good">Passkeys-first (WebAuthn step-up); TOTP planned</td>
+          <td>TOTP, Passkeys (plugin)</td>
+        </tr>
+        <tr>
+          <td class="dim">SSO</td>
+          <td class="col-bf good">Okta, Entra ID, Google Workspace OIDC recipes + <code>sso doctor</code></td>
+          <td>Broad OIDC/SAML support via plugin</td>
+        </tr>
+        <tr>
+          <td class="dim">SCIM provisioning</td>
+          <td class="col-bf good">RFC 7643/7644 compliant — Users CRUD, Groups, Schemas, ServiceProviderConfig</td>
+          <td class="neutral">Not available (as of July 2026)</td>
+        </tr>
+        <tr>
+          <td class="dim">Security scanner CLI</td>
+          <td class="col-bf good"><code>blindfold doctor</code> — env hygiene, secret quality, TLS, Studio exposure</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Password security</td>
+          <td class="col-bf good">12-char min (OWASP default); HIBP k-anonymity breach check (opt-in)</td>
+          <td class="neutral">Configurable min length; no built-in breach check</td>
+        </tr>
+        <tr>
+          <td class="dim">Database support</td>
+          <td class="col-bf">PostgreSQL, SQLite, MongoDB; adapter interface for others</td>
+          <td class="good">PostgreSQL, MySQL, SQLite, MongoDB + more adapters</td>
+        </tr>
+        <tr>
+          <td class="dim">Framework support</td>
+          <td class="col-bf">Express, Fastify, Hono — Node.js first</td>
+          <td class="good">Express, Fastify, Hono, Next.js, SvelteKit, Remix, Nuxt, Astro, Expo, Elysia…</td>
+        </tr>
+        <tr>
+          <td class="dim">Plugin ecosystem</td>
+          <td class="col-bf neutral">Early stage</td>
+          <td class="good">Large and growing (Stripe, social auth, org management, etc.)</td>
+        </tr>
+        <tr>
+          <td class="dim">MCP / agent integration</td>
+          <td class="col-bf good">Blindfold MCP server — create workspaces, issue keys, define roles via AI agent</td>
+          <td class="na">Not available</td>
+        </tr>
+        <tr>
+          <td class="dim">Migration importer</td>
+          <td class="col-bf good"><code>importFromBetterAuth()</code> — map Better Auth users into Blindfold</td>
+          <td class="na">No Blindfold importer</td>
+        </tr>
+        <tr>
+          <td class="dim">Maturity</td>
+          <td class="col-bf neutral">v0.1 (June 2026); early community</td>
+          <td class="good">v1+ (2024); active community; frequent releases</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Capabilities marked "Not available" reflect the state of Better Auth as of July 2026. Check the Better Auth changelog for recent additions. Blindfold capabilities are verified against shipped, tested code in the v0.1 release.</p>
+</section>
+
+<!-- Differentiators -->
+<section class="content">
+  <h2 class="section-title">Where Blindfold goes deeper</h2>
+  <div class="diff-grid">
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🔍</span>
+      <h3>Explainable authorization</h3>
+      <p><code>auth.explain({ subject, resource, action })</code> returns a full trace: which rules evaluated, which applied, which were shadowed, the deciding rule, and any obligations. You can see exactly why a field was masked or a request denied.</p>
+      <p>Better Auth's authorization is imperative — you write callbacks, not declarative rules, so there's nothing to trace.</p>
+    </div>
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🧪</span>
+      <h3>Policy test runner + dry-run</h3>
+      <p><code>runPolicySuite(cases)</code> runs table-driven allow/deny/mask tests against your live policy set. Failures are self-explaining — you see the actual effect and which rule caused it.</p>
+      <p><code>admin.policies.dryRun(proposed)</code> overlays a proposed rule change without persisting it, showing before/after per-case — so you can validate a policy change before shipping it.</p>
+    </div>
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🛡️</span>
+      <h3>Hash-chained audit log</h3>
+      <p>Every auth event carries a SHA-256 chain hash linking it to the predecessor. <code>admin.audit.verify()</code> walks the chain; any mutation — a deleted row, a changed field — breaks the chain and reports exactly where.</p>
+      <p>Useful for SOC 2 / compliance contexts where you need to prove the log has not been tampered with.</p>
+    </div>
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🎛️</span>
+      <h3>Studio policy debugger</h3>
+      <p>Run <code>blindfold studio</code> to open a local web UI. The Policy Debugger panel lets you send a test request and read a plain-English narrative of why it was allowed, denied, or masked — without reading JSON. The What-If panel runs your policy dry-run visually. Free; no account required.</p>
+    </div>
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🏥</span>
+      <h3>blindfold doctor</h3>
+      <p><code>blindfold doctor</code> scans your environment for security misconfigurations: missing secrets, low-entropy values, DB TLS disabled, default credentials, Studio exposure on public networks. Criticals exit 1 so they block CI.</p>
+    </div>
+    <div class="diff-card bf-diff">
+      <span class="diff-icon">🔑</span>
+      <h3>Passkeys-first MFA</h3>
+      <p>Password login gates on a passkey second factor when <code>mfa.passkey.enabled</code>. The client completes the WebAuthn ceremony and receives a session with <code>authStrength: "mfa_passkey"</code>. Graceful fallback if no passkey is registered. TOTP is planned as an additional factor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Migration note -->
+<section class="content">
+  <h2 class="section-title">Coming from Better Auth?</h2>
+  <div class="migration-card">
+    <h3>importFromBetterAuth()</h3>
+    <p>Blindfold ships a first-class migration importer so you can move users without a password-reset campaign:</p>
+    <ul>
+      <li>Maps <code>name → displayName</code>, <code>emailVerified / image / createdAt / updatedAt → attributes</code>; extra columns pass through.</li>
+      <li>Passwords are <strong>not</strong> migrated (argon2/bcrypt algorithm mismatch). Use the optional <code>resolvePassword</code> callback to issue temporary plaintext passwords for a grace-period rehash on next login.</li>
+      <li><code>skipExisting: true</code> makes the import idempotent — safe to re-run.</li>
+      <li><code>actorId</code> is forwarded to audit events so the migration appears as a single actor in the log.</li>
+    </ul>
+    <p style="margin-top:14px;font-size:13px;color:var(--muted);">
+      <code>import { importFromBetterAuth } from '@dmc--98/blindfold-auth'</code>
+    </p>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-band-wrap">
+  <div class="cta-band">
+    <h2>Own your auth. All of it.</h2>
+    <p>RBAC + ABAC + field masking + hash-chained audit + Studio. Free forever.</p>
+    <div class="cta-row">
+      <a class="btn" href="index.html#start">Get started — free</a>
+      <a class="btn ghost" href="https://github.com/dmc-98/blindfold-auth" target="_blank" rel="noopener">⭐ Star on GitHub</a>
+      <a class="btn ghost" href="index.html#compare">← All comparisons</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Blindfold Auth · Apache 2.0 · <a href="https://github.com/dmc-98/blindfold-auth">GitHub</a></p>
+  <p><a href="index.html">← Back to home</a></p>
+</footer>
+
+</body>
+</html>
